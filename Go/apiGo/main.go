@@ -10,8 +10,8 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/players", actions.Show).Methods(http.MethodGet)
-	r.HandleFunc("/players/", actions.ShowID).Queries("id", "{id}").Methods(http.MethodGet)
+	r.HandleFunc("/players", actions.ListPlayers).Methods(http.MethodGet)
+	r.HandleFunc("/players/", actions.Show).Queries("id", "{id}").Methods(http.MethodGet)
 	r.HandleFunc("/players", actions.Create).Methods(http.MethodPost)
 	r.HandleFunc("/players/", actions.Delete).Queries("id", "{id}").Methods(http.MethodDelete)
 	r.HandleFunc("/players/", actions.Update).Queries("id", "{id}").Methods(http.MethodPut)

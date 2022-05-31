@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/mateo/apiGo/models"
 )
 
-func Show(w http.ResponseWriter, r *http.Request) {
+func ListPlayers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.P, Message: ""})
@@ -18,7 +17,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func ShowID(w http.ResponseWriter, r *http.Request) {
+func Show(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//params := mux.Vars(r)
 	key := r.FormValue("id")
@@ -51,13 +50,14 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
+
 	players := models.P
 	var newPlayers models.Player
 	json.NewDecoder(r.Body).Decode(&newPlayers)
-	newPlayers.ID = uuid.New()
+
 	models.P = append(players, newPlayers)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.P, Message: ""})
+	json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.ListPlayers{newPlayers}, Message: ""})
 
 }
 
@@ -82,7 +82,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 				models.P[i].Level = tempUpdate.Level
 			}
 
-			json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.P, Message: ""})
+			json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.ListPlayers{models.P[i]}, Message: ""})
 			return
 		}
 	}
