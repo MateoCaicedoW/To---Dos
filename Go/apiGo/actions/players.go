@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/mateo/apiGo/models"
 )
 
@@ -50,14 +51,18 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "application/json")
 	players := models.P
 	var newPlayers models.Player
 	json.NewDecoder(r.Body).Decode(&newPlayers)
+	newPlayers.ID = uuid.New()
+	if int(newPlayers.Level) == 0 || newPlayers.FirstName == "" || newPlayers.LastName == "" {
+		json.NewEncoder(w).Encode(models.Template{Status: 400, Data: models.ListPlayers{}, Message: "Insert a valid Data"})
+	} else {
+		models.P = append(players, newPlayers)
+		json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.ListPlayers{newPlayers}, Message: ""})
 
-	models.P = append(players, newPlayers)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.ListPlayers{newPlayers}, Message: ""})
+	}
 
 }
 
@@ -71,19 +76,16 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	for i, item := range models.P {
 		if key == item.ID.String() {
-			if tempUpdate.FirstName != "" {
+			if int(tempUpdate.Level) == 0 || tempUpdate.FirstName == "" || tempUpdate.LastName == "" {
+				json.NewEncoder(w).Encode(models.Template{Status: 400, Data: models.ListPlayers{models.P[i]}, Message: "Insert a valid Data"})
+				return
+			} else {
 				models.P[i].FirstName = tempUpdate.FirstName
-			}
-			if tempUpdate.LastName != "" {
 				models.P[i].LastName = tempUpdate.LastName
-			}
-
-			if tempUpdate.Level != 0 {
 				models.P[i].Level = tempUpdate.Level
+				json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.ListPlayers{models.P[i]}, Message: ""})
+				return
 			}
-
-			json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.ListPlayers{models.P[i]}, Message: ""})
-			return
 		}
 	}
 	json.NewEncoder(w).Encode(&models.Template{Status: 400, Data: models.ListPlayers{}, Message: "ID is invalid"})

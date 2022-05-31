@@ -57,7 +57,17 @@ func TestPlayers(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	var jsonStr = []byte(`{"ID":"5037efd5-9706-4164-b59d-f3d87992be61","FirstName":"xyz","LastName":"pqr","Level":10}`)
+	newplayer := models.Player{
+		ID:        uuid.New(),
+		FirstName: "John",
+		LastName:  "Riqui",
+		Level:     2,
+	}
 
+	jsonStr, err := json.Marshal(newplayer)
+	if err != nil {
+		panic(err)
+	}
 	req, err := http.NewRequest("POST", "/players", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatalf("could not created request: %v", err)
