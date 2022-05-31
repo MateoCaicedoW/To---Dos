@@ -9,6 +9,17 @@ type Player struct {
 	Level     int64
 }
 
+func (p *Player) Validate() (result Template) {
+	if p.FirstName == "" {
+		result = Template{Status: 400, Data: ListPlayers{}, Message: "You inserted a Int on FirstName"}
+	} else if p.LastName == "" {
+		result = Template{Status: 400, Data: ListPlayers{}, Message: "You inserted a Int on LastName"}
+	} else if p.Level == 0 {
+		result = Template{Status: 400, Data: ListPlayers{}, Message: "You inserted a string on Level"}
+	}
+	return
+}
+
 type Template struct {
 	Status  int
 	Data    ListPlayers

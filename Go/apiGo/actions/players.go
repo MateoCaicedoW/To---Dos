@@ -56,8 +56,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	var newPlayers models.Player
 	json.NewDecoder(r.Body).Decode(&newPlayers)
 	newPlayers.ID = uuid.New()
-	if int(newPlayers.Level) == 0 || newPlayers.FirstName == "" || newPlayers.LastName == "" {
-		json.NewEncoder(w).Encode(models.Template{Status: 400, Data: models.ListPlayers{}, Message: "Insert a valid Data"})
+	err := newPlayers.Validate()
+	if err.Data != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
 	} else {
 		models.P = append(players, newPlayers)
 		json.NewEncoder(w).Encode(models.Template{Status: 200, Data: models.ListPlayers{newPlayers}, Message: ""})
@@ -76,8 +78,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	for i, item := range models.P {
 		if key == item.ID.String() {
-			if int(tempUpdate.Level) == 0 || tempUpdate.FirstName == "" || tempUpdate.LastName == "" {
-				json.NewEncoder(w).Encode(models.Template{Status: 400, Data: models.ListPlayers{models.P[i]}, Message: "Insert a valid Data"})
+			err := tempUpdate.Validate()
+			if err.Data != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(err)
 				return
 			} else {
 				models.P[i].FirstName = tempUpdate.FirstName
