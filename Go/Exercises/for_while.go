@@ -15,7 +15,7 @@ func main() {
 		num = rand.Intn(len(list))
 
 	}
-	getColor(list, num)
+	Color(list, num)
 
 	//
 
@@ -32,11 +32,11 @@ func main() {
 
 }
 
-func getColor(list [7]string, num int) {
+func Color(list [7]string, num int) {
 	if num%2 == 0 {
 		fmt.Println(list[num])
 	} else {
-		getColor(list, num)
+		Color(list, num)
 	}
 
 }
