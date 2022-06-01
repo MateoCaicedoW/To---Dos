@@ -10,12 +10,12 @@ func TestValidate(t *testing.T) {
 	newPlayers := Player{
 		ID:        uuid.New(),
 		FirstName: "John",
-		LastName:  "333",
+		LastName:  "Lenon",
 		Level:     5,
 	}
 	err := newPlayers.Validate()
 
 	if err.Data != nil {
-		t.Errorf("Error")
+		t.Error(err)
 	}
 }
