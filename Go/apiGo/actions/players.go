@@ -15,7 +15,7 @@ func (h handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(result.Error)
 	} else {
-		w.WriteHeader(http.StatusAccepted)
+		w.WriteHeader(http.StatusSeeOther)
 		json.NewEncoder(w).Encode(models.TemplatePlayers{Status: http.StatusAccepted, Data: players, Message: ""})
 	}
 
