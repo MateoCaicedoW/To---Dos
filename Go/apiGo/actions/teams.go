@@ -16,7 +16,7 @@ func (h handler) ListTeams(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(result.Error)
 	} else {
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(models.TemplateTeams{Status: 200, Data: teams, Message: ""})
+		json.NewEncoder(w).Encode(models.TemplateTeams{Status: http.StatusAccepted, Data: teams, Message: ""})
 	}
 
 }
@@ -28,11 +28,11 @@ func (h handler) ShowTeam(w http.ResponseWriter, r *http.Request) {
 	var team models.Team
 	if result := h.db.First(&team, &key); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&models.TemplateTeams{Status: 404, Data: models.ListTeams{}, Message: "Team was not found"})
+		json.NewEncoder(w).Encode(&models.TemplateTeams{Status: http.StatusNotFound, Data: models.ListTeams{}, Message: "Team was not found"})
 		return
 	} else {
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(models.TemplateTeams{Status: 200, Data: models.ListTeams{team}, Message: ""})
+		json.NewEncoder(w).Encode(models.TemplateTeams{Status: http.StatusAccepted, Data: models.ListTeams{team}, Message: ""})
 		return
 	}
 
@@ -48,7 +48,7 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	if err.Data != nil {
 		if result := h.db.Create(&team); result.Error != nil {
 			w.WriteHeader(http.StatusBadGateway)
-			json.NewEncoder(w).Encode(&models.TemplateTeams{Status: 502, Data: models.ListTeams{}, Message: "Team was not created"})
+			json.NewEncoder(w).Encode(&models.TemplateTeams{Status: http.StatusBadGateway, Data: models.ListTeams{}, Message: "Team was not created"})
 			return
 		} else {
 			w.WriteHeader(http.StatusOK)
@@ -69,12 +69,12 @@ func (h handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 	var team models.Team
 	if result := h.db.First(&team, &key); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&models.TemplateTeams{Status: 404, Data: models.ListTeams{}, Message: "Team was not found"})
+		json.NewEncoder(w).Encode(&models.TemplateTeams{Status: http.StatusNotFound, Data: models.ListTeams{}, Message: "Team was not found"})
 		return
 	} else {
 		if result := h.db.Delete(&team); result.Error != nil {
 			w.WriteHeader(http.StatusBadGateway)
-			json.NewEncoder(w).Encode(&models.TemplateTeams{Status: 502, Data: models.ListTeams{}, Message: "Team was not created"})
+			json.NewEncoder(w).Encode(&models.TemplateTeams{Status: http.StatusBadGateway, Data: models.ListTeams{}, Message: "Team was not created"})
 			return
 		} else {
 			w.WriteHeader(http.StatusOK)
@@ -94,7 +94,7 @@ func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	var team models.Team
 	if result := h.db.First(&team, &key); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&models.TemplateTeams{Status: 404, Data: models.ListTeams{}, Message: "Team was not found"})
+		json.NewEncoder(w).Encode(&models.TemplateTeams{Status: http.StatusNotFound, Data: models.ListTeams{}, Message: "Team was not found"})
 		return
 	} else {
 		err := tempUpdate.Validate()
@@ -104,7 +104,7 @@ func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 			team.Type = tempUpdate.Type
 			if result := h.db.Save(&team); result.Error != nil {
 				w.WriteHeader(http.StatusBadGateway)
-				json.NewEncoder(w).Encode(&models.TemplateTeams{Status: 502, Data: models.ListTeams{}, Message: "Team was not updated"})
+				json.NewEncoder(w).Encode(&models.TemplateTeams{Status: http.StatusBadGateway, Data: models.ListTeams{}, Message: "Team was not updated"})
 				return
 			} else {
 				w.WriteHeader(http.StatusCreated)

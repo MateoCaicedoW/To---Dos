@@ -16,7 +16,7 @@ func (h handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(result.Error)
 	} else {
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(models.TemplatePlayers{Status: 200, Data: players, Message: ""})
+		json.NewEncoder(w).Encode(models.TemplatePlayers{Status: http.StatusAccepted, Data: players, Message: ""})
 	}
 
 }
@@ -28,11 +28,11 @@ func (h handler) ShowPlayer(w http.ResponseWriter, r *http.Request) {
 	var player models.Player
 	if result := h.db.First(&player, &key); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: 404, Data: models.ListPlayers{}, Message: "Player was not found"})
+		json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: http.StatusNotFound, Data: models.ListPlayers{}, Message: "Player was not found"})
 		return
 	} else {
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(models.TemplatePlayers{Status: 200, Data: models.ListPlayers{player}, Message: ""})
+		json.NewEncoder(w).Encode(models.TemplatePlayers{Status: http.StatusAccepted, Data: models.ListPlayers{player}, Message: ""})
 		return
 	}
 
@@ -44,12 +44,12 @@ func (h handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 	var player models.Player
 	if result := h.db.First(&player, &key); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: 404, Data: models.ListPlayers{}, Message: "Player was not found"})
+		json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: http.StatusNotFound, Data: models.ListPlayers{}, Message: "Player was not found"})
 		return
 	} else {
 		if result := h.db.Delete(&player); result.Error != nil {
 			w.WriteHeader(http.StatusBadGateway)
-			json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: 502, Data: models.ListPlayers{}, Message: "Player was not deleted"})
+			json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: http.StatusBadGateway, Data: models.ListPlayers{}, Message: "Player was not deleted"})
 			return
 		} else {
 			w.WriteHeader(http.StatusOK)
@@ -69,7 +69,7 @@ func (h handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	if err.Data != nil {
 		if result := h.db.Create(&newPlayers); result.Error != nil {
 			w.WriteHeader(http.StatusBadGateway)
-			json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: 502, Data: models.ListPlayers{}, Message: "Player was not created"})
+			json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: http.StatusBadGateway, Data: models.ListPlayers{}, Message: "Player was not created"})
 			return
 		} else {
 			w.WriteHeader(http.StatusOK)
@@ -97,14 +97,14 @@ func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 
 	if result := h.db.First(&player, &key); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: 404, Data: models.ListPlayers{}, Message: "Player was not found"})
+		json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: http.StatusNotFound, Data: models.ListPlayers{}, Message: "Player was not found"})
 		return
 	} else {
 		err := tempUpdate.Validate()
 		if err.Data != nil {
 			if result := h.db.Model(&player).Updates(tempUpdate); result.Error != nil {
 				w.WriteHeader(http.StatusBadGateway)
-				json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: 502, Data: models.ListPlayers{}, Message: "Player was not updated"})
+				json.NewEncoder(w).Encode(&models.TemplatePlayers{Status: http.StatusBadGateway, Data: models.ListPlayers{}, Message: "Player was not updated"})
 				return
 			} else {
 				w.WriteHeader(http.StatusCreated)

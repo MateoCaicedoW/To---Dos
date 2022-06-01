@@ -1,6 +1,8 @@
 package models
 
 import (
+	"net/http"
+
 	"github.com/google/uuid"
 )
 
@@ -13,13 +15,13 @@ type Team struct {
 
 func (t *Team) Validate() (result TemplateTeams) {
 	if t.Name == "" {
-		result = TemplateTeams{Status: 400, Data: nil, Message: "You inserted an Int or string empty on Name"}
+		result = TemplateTeams{Status: http.StatusBadRequest, Data: nil, Message: "You inserted an Int or string empty on Name"}
 	} else if t.Type == "" {
-		result = TemplateTeams{Status: 400, Data: nil, Message: "You inserted an Int or string empty on Type"}
+		result = TemplateTeams{Status: http.StatusBadRequest, Data: nil, Message: "You inserted an Int or string empty on Type"}
 	} else if t.Type == "Club" && t.Country == "" {
-		result = TemplateTeams{Status: 400, Data: nil, Message: "You inserted an Int or string empty on Country"}
+		result = TemplateTeams{Status: http.StatusBadRequest, Data: nil, Message: "You inserted an Int or string empty on Country"}
 	} else {
-		result = TemplateTeams{Status: 400, Data: ListTeams{}, Message: ""}
+		result = TemplateTeams{Status: http.StatusBadRequest, Data: ListTeams{}, Message: ""}
 	}
 	return
 }
