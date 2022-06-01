@@ -26,7 +26,7 @@ func (p *Player) Validate() (result TemplatePlayers) {
 	} else if p.PhysicalCondition == "" {
 		result = TemplatePlayers{Status: 400, Data: nil, Message: "You inserted an Int or string empty on PhysicalCondition"}
 	} else {
-		result = TemplatePlayers{Status: 200, Data: ListPlayers{}, Message: ""}
+		result = TemplatePlayers{Status: 400, Data: ListPlayers{}, Message: ""}
 	}
 	return
 }
