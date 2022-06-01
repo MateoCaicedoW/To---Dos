@@ -26,7 +26,7 @@ func TestShow(t *testing.T) {
 	req.URL.RawQuery = q.Encode()
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.Show)
+	handler := http.HandlerFunc(h.ShowPlayer)
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -78,7 +78,7 @@ func TestCreate(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(h.Create)
+	handler := http.HandlerFunc(h.CreatePlayer)
 
 	handler.ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusOK {
@@ -106,7 +106,7 @@ func TestUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.Update)
+	handler := http.HandlerFunc(h.UpdatePlayer)
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -127,16 +127,10 @@ func TestDelete(t *testing.T) {
 	q.Set("id", "5e3564aa-5d12-4e5e-af7b-ba65f20cdc9e")
 	req.URL.RawQuery = q.Encode()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.Delete)
+	handler := http.HandlerFunc(h.DeletePlayer)
 	handler.ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	//expected := rr.Body.String()
-
-	// if expected != 200 {
-	// 	t.Errorf("handler returned unexpected body: got %v want %v",
-	// 		200, expected)
-	// }
 }
