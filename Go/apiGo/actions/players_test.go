@@ -8,10 +8,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/mateo/apiGo/db"
 	"github.com/mateo/apiGo/models"
 )
 
 func TestShow(t *testing.T) {
+	DB := db.Init()
+	h := New(DB)
 	req, err := http.NewRequest("GET", "/players/", nil)
 	if err != nil {
 		t.Fatalf("could not created request: %v", err)
@@ -19,44 +22,43 @@ func TestShow(t *testing.T) {
 
 	q := req.URL.Query()
 
-	q.Set("id", "deae98b1-feab-47d0-a64b-5808bb12d612")
+	q.Set("id", "d54126be-9663-45aa-b135-c27d500c2f26")
 	req.URL.RawQuery = q.Encode()
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(Show)
+	handler := http.HandlerFunc(h.Show)
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
-
-	expected := models.P[0].ID
-	if expected != uuid.MustParse("deae98b1-feab-47d0-a64b-5808bb12d612") {
-		t.Errorf("handler returned unexpected body: got %v want %v", "deae98b1-feab-47d0-a64b-5808bb12d612", expected)
+	key := req.FormValue("id")
+	var player models.Player
+	expected := h.db.First(&player, &key)
+	if expected.Error != nil {
+		t.Errorf("handler returned unexpected body: got %v want %v", "d54126be-9663-45aa-b135-c27d500c2f26", key)
 	}
 }
+
 func TestPlayers(t *testing.T) {
+	DB := db.Init()
+	h := New(DB)
 	req, err := http.NewRequest("GET", "/players", nil)
 	if err != nil {
 		t.Fatalf("could not created request: %v", err)
 	}
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(ListPlayers)
+	handler := http.HandlerFunc(h.ListPlayers)
 	handler.ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
-	// Check the response body is what we expect.
 
-	expected := len(models.P)
-	if expected != 11 {
-
-		t.Errorf("handler returned unexpected body: got %v want %v", 11, expected)
-	}
 }
 
 func TestCreate(t *testing.T) {
-	var jsonStr = []byte(`{"ID":"5037efd5-9706-4164-b59d-f3d87992be61","FirstName":"xyz","LastName":"pqr","Level":10}`)
+	DB := db.Init()
+	h := New(DB)
 	newplayer := models.Player{
 		ID:        uuid.New(),
 		FirstName: "John",
@@ -76,69 +78,65 @@ func TestCreate(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(Create)
+	handler := http.HandlerFunc(h.Create)
 
 	handler.ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	expected := len(models.P)
-	if expected != 12 {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			12, expected)
-	}
 
 }
-func TestUpdate(t *testing.T) {
 
+func TestUpdate(t *testing.T) {
+	DB := db.Init()
+	h := New(DB)
 	player := models.Player{
 		FirstName: "Messi",
 		LastName:  "Ronaldo",
+		Level:     2,
 	}
 
 	jsonStr, err := json.Marshal(player)
 	if err != nil {
 		panic(err)
 	}
-	req, err := http.NewRequest(http.MethodPut, "/players/?id=deae98b1-feab-47d0-a64b-5808bb12d612", bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest(http.MethodPut, "/players/?id=f6cddd44-0e37-49d6-b947-0dee1baef9ed", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)
 	}
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(Update)
+	handler := http.HandlerFunc(h.Update)
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	expected := models.P[0].FirstName
-	if expected != "Messi" {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			"Messi", expected)
-	}
 }
 
-func TestDele(t *testing.T) {
+func TestDelete(t *testing.T) {
+	DB := db.Init()
+	h := New(DB)
 	req, err := http.NewRequest("PUT", "/players/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	q := req.URL.Query()
-	q.Set("id", "deae98b1-feab-47d0-a64b-5808bb12d612")
+	q.Set("id", "5e3564aa-5d12-4e5e-af7b-ba65f20cdc9e")
 	req.URL.RawQuery = q.Encode()
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(Delete)
+	handler := http.HandlerFunc(h.Delete)
 	handler.ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	expected := len(models.P)
-	if expected != 11 {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			11, expected)
-	}
+	//expected := rr.Body.String()
+
+	// if expected != 200 {
+	// 	t.Errorf("handler returned unexpected body: got %v want %v",
+	// 		200, expected)
+	// }
 }
