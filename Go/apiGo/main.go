@@ -10,27 +10,36 @@ import (
 )
 
 func main() {
+	//intance of db
 	DB := db.Init()
-	h := actions.New(DB)
+	handler := actions.New(DB)
 
-	r := mux.NewRouter()
+	//create router
+	router := mux.NewRouter()
+
 	//routes to teams
-	r.HandleFunc("/players", h.ListPlayers).Methods(http.MethodGet)
-	r.HandleFunc("/players/", h.ShowPlayer).Queries("id", "{id}").Methods(http.MethodGet)
-	r.HandleFunc("/players", h.CreatePlayer).Methods(http.MethodPost)
-	r.HandleFunc("/players/", h.DeletePlayer).Queries("id", "{id}").Methods(http.MethodDelete)
-	r.HandleFunc("/players/", h.UpdatePlayer).Queries("id", "{id}").Methods(http.MethodPut)
-	//routes to players
-	r.HandleFunc("/teams", h.ListTeams).Methods(http.MethodGet)
-	r.HandleFunc("/teams/", h.ShowTeam).Queries("id", "{id}").Methods(http.MethodGet)
-	r.HandleFunc("/teams", h.CreateTeam).Methods(http.MethodPost)
-	r.HandleFunc("/teams/", h.DeleteTeam).Queries("id", "{id}").Methods(http.MethodDelete)
-	r.HandleFunc("/teams/", h.UpdateTeam).Queries("id", "{id}").Methods(http.MethodPut)
+	router.HandleFunc("/players", handler.ListPlayers).Methods(http.MethodGet)
+	router.HandleFunc("/players/{id}", handler.ShowPlayer).Methods(http.MethodGet)
+	router.HandleFunc("/players", handler.CreatePlayer).Methods(http.MethodPost)
+	router.HandleFunc("/players/{id}", handler.DeletePlayer).Methods(http.MethodDelete)
+	router.HandleFunc("/players/{id}", handler.UpdatePlayer).Methods(http.MethodPut)
 
+	//routes to players
+	router.HandleFunc("/teams", handler.ListTeams).Methods(http.MethodGet)
+	router.HandleFunc("/teams/{id}", handler.ShowTeam).Methods(http.MethodGet)
+	router.HandleFunc("/teams", handler.CreateTeam).Methods(http.MethodPost)
+	router.HandleFunc("/teams/{id}", handler.DeleteTeam).Methods(http.MethodDelete)
+	router.HandleFunc("/teams/{id}", handler.UpdateTeam).Methods(http.MethodPut)
+
+	//configure server
 	server := &http.Server{
 		Addr:    ":3000",
-		Handler: r,
+		Handler: router,
 	}
+
 	log.Println("Listen ....")
+
+	//start server
 	server.ListenAndServe()
+
 }

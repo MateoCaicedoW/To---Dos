@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/mateo/apiGo/db"
 	"github.com/mateo/apiGo/models"
 )
@@ -15,38 +16,42 @@ import (
 func TestShowPlayer(t *testing.T) {
 	DB := db.Init()
 	h := New(DB)
-	req, err := http.NewRequest("GET", "/players/", nil)
-	if err != nil {
-		t.Fatalf("could not created request: %v", err)
+
+	router := mux.NewRouter()
+	router.HandleFunc("/players/{id}", h.ShowPlayer).Methods("GET")
+
+	server := &http.Server{
+		Addr:    ":3000",
+		Handler: router,
 	}
-
-	q := req.URL.Query()
-
-	q.Set("id", "d54126be-9663-45aa-b135-c27d500c2f26")
-	req.URL.RawQuery = q.Encode()
-
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.ShowPlayer)
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusAccepted {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusAccepted)
+	server.ListenAndServe()
+	requestresponse := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/players/98cb12a0-e168-44c3-af5e-ab38b45ca84b", nil)
+	server.Handler.ServeHTTP(requestresponse, req)
+	if status := requestresponse.Code; status != http.StatusAccepted {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusAccepted)
 	}
-
 }
 
 func TestListPlayers(t *testing.T) {
 	DB := db.Init()
 	h := New(DB)
-	req, err := http.NewRequest("GET", "/players", nil)
-	if err != nil {
-		t.Fatalf("could not created request: %v", err)
+
+	router := mux.NewRouter()
+	router.HandleFunc("/players", h.ListPlayers).Methods("GET")
+
+	server := &http.Server{
+		Addr:    ":3000",
+		Handler: router,
 	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.ListPlayers)
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusAccepted {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusAccepted)
+
+	requestresponse := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/players", nil)
+	server.Handler.ServeHTTP(requestresponse, req)
+	if status := requestresponse.Code; status != http.StatusSeeOther {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusAccepted)
 	}
 
 }
@@ -59,7 +64,7 @@ func TestCreatePlayer(t *testing.T) {
 		FirstName:         "John",
 		LastName:          "Riqui",
 		Level:             2,
-		Edad:              32,
+		Age:               32,
 		Position:          "Defender",
 		PhysicalCondition: "A+",
 	}
@@ -74,12 +79,12 @@ func TestCreatePlayer(t *testing.T) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	rr := httptest.NewRecorder()
+	requestresponse := httptest.NewRecorder()
 
 	handler := http.HandlerFunc(h.CreatePlayer)
 
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
+	handler.ServeHTTP(requestresponse, req)
+	if status := requestresponse.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
@@ -93,7 +98,7 @@ func TestUpdatePlayer(t *testing.T) {
 		FirstName:         "Samuel",
 		LastName:          "Solano",
 		Level:             2,
-		Edad:              32,
+		Age:               32,
 		Position:          "Defender",
 		PhysicalCondition: "A+",
 	}
@@ -102,15 +107,21 @@ func TestUpdatePlayer(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	req, err := http.NewRequest(http.MethodPut, "/players/?id=873d44af-6b8a-449d-82c7-cf5485955be9", bytes.NewBuffer(jsonStr))
+	router := mux.NewRouter()
+	router.HandleFunc("/players/{id}", h.UpdatePlayer).Methods("PUT")
+
+	server := &http.Server{
+		Addr:    ":3000",
+		Handler: router,
+	}
+	req, err := http.NewRequest(http.MethodPut, "/players/12a76c4f-42a1-4f9f-a013-aa8c65e16993", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)
 	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.UpdatePlayer)
-	handler.ServeHTTP(rr, req)
+	requestresponse := httptest.NewRecorder()
+	server.Handler.ServeHTTP(requestresponse, req)
 
-	if status := rr.Code; status != http.StatusCreated {
+	if status := requestresponse.Code; status != http.StatusCreated {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusCreated)
 	}
@@ -119,18 +130,22 @@ func TestUpdatePlayer(t *testing.T) {
 func TestDeletePlayer(t *testing.T) {
 	DB := db.Init()
 	h := New(DB)
-	req, err := http.NewRequest("PUT", "/players/", nil)
+	router := mux.NewRouter()
+	router.HandleFunc("/players/{id}", h.DeletePlayer).Methods(http.MethodDelete)
+
+	server := &http.Server{
+		Addr:    ":3000",
+		Handler: router,
+	}
+	req, err := http.NewRequest(http.MethodDelete, "/players/e99b98c6-0127-4ced-887a-66a9d89ef89c", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	q := req.URL.Query()
-	q.Set("id", "873d44af-6b8a-449d-82c7-cf5485955be9")
-	req.URL.RawQuery = q.Encode()
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.DeletePlayer)
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
+	requestresponse := httptest.NewRecorder()
+	server.Handler.ServeHTTP(requestresponse, req)
+
+	if status := requestresponse.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
