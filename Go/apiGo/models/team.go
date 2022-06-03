@@ -16,41 +16,34 @@ var (
 )
 
 type Team struct {
-	ID      uuid.UUID `gorm:"primary_key"`
+	IDTeam  uuid.UUID `gorm:"primary_key"`
 	Name    string
 	Type    string
 	Country string
+	Players []Player `gorm:"many2many:player_team;"`
 }
 
 func (t *Team) Validate() (response TeamResponse) {
-	numbers := regexp.MustCompile("^[0-9]+$")
 	response.Data = ListTeams{}
 	response.Status = http.StatusBadRequest
-	nameTeam := strings.Trim(strings.ToLower(t.Name), " ")
-	typeTeam := strings.Trim(strings.ToLower(t.Type), " ")
-	countryTeam := strings.Trim(strings.ToLower(t.Country), " ")
+	nameTeam := strings.Replace(strings.ToLower(t.Name), " ", "", -1)
+	typeTeam := strings.Replace(strings.ToLower(t.Type), " ", "", -1)
+	countryTeam := strings.Replace(strings.ToLower(t.Country), " ", "", -1)
 	if nameTeam == "" {
 		response.Message = "Name cant not be empty."
 		return
 	}
-	if nameTeam != "" && numbers.MatchString(nameTeam) {
-		response.Message = "Name cant not be a number."
+	if t.numbersAndCaracters(nameTeam, "Name").Message != "" {
+		response.Message = t.numbersAndCaracters(nameTeam, "Name").Message
 		return
 	}
 
 	if typeTeam == "" {
-		response.Message = "Type cant not be empty"
-		return
-	}
-	if typeTeam != "" && numbers.MatchString(typeTeam) {
+		response.Message = "Type cant not be empty."
 		return
 	}
 	if typeTeam == Club && countryTeam == "" {
-		response.Message = "Country cant not be empty if Type is Club"
-		return
-	}
-	if countryTeam != "" && numbers.MatchString(countryTeam) {
-		response.Message = "Country cant not be a number."
+		response.Message = "Country cant not be empty if Type is Club."
 		return
 	}
 	if t.validateType().Message != "" {
@@ -58,8 +51,14 @@ func (t *Team) Validate() (response TeamResponse) {
 		return
 	}
 	if typeTeam != Club && countryTeam != "" {
-		response.Message = "Country must be empty if Type is National"
+		response.Message = "Country must be empty if Type is Seleccion."
 		return
+	}
+
+	if t.numbersAndCaracters(countryTeam, "Country").Message != "" {
+		response.Message = t.numbersAndCaracters(countryTeam, "Country").Message
+		return
+
 	}
 
 	response.Message = ""
@@ -67,16 +66,42 @@ func (t *Team) Validate() (response TeamResponse) {
 }
 
 func (t *Team) validateType() (response TeamResponse) {
-	response.Data = nil
+
 	response.Status = http.StatusBadRequest
-	typeTeam := strings.Trim(strings.ToLower(t.Type), " ")
+	typeTeam := strings.Replace(strings.ToLower(t.Type), " ", "", -1)
 	for _, v := range types {
 		if typeTeam == v {
 			response.Message = ""
 			return
 		}
 	}
-	response.Message = "Type must be Seleccion or Club"
+
+	if t.numbersAndCaracters(typeTeam, "Type").Message != "" {
+		response.Message = t.numbersAndCaracters(typeTeam, "Type").Message
+		return
+	}
+
+	response.Message = "Type must be Seleccion or Club."
+	return
+}
+
+func (p *Team) numbersAndCaracters(param string, field string) (response TeamResponse) {
+	numbers := regexp.MustCompile("^[0-9]+$")
+	caracters := regexp.MustCompile("^[!-/:-@[-`{-~-$]+$")
+	if param != "" {
+		for _, item := range strings.Split(param, "") {
+			if caracters.MatchString(item) {
+				response.Message = field + " cant not contains caracters."
+				return
+			}
+			if numbers.MatchString(item) {
+				response.Message = field + " cant not be a number."
+				return
+			}
+		}
+	}
+
+	response.Message = ""
 	return
 }
 

@@ -16,5 +16,7 @@ func Init() *gorm.DB {
 
 	dbb.AutoMigrate(&models.Player{})
 	dbb.AutoMigrate(&models.Team{})
+
+	//dbb.AutoMigrate(&models.PlayerTeam{})
 	return dbb
 }

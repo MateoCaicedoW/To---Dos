@@ -6,16 +6,120 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestValidate(t *testing.T) {
-	newPlayers := Player{
-		ID:        uuid.New(),
-		FirstName: "John",
-		LastName:  "Lenon",
-		Level:     5,
-	}
-	err := newPlayers.Validate()
+type test struct {
+	input  []Player
+	output string
+}
 
-	if err.Data != nil {
-		t.Error(err)
+func Test_validate(t *testing.T) {
+	tests := []test{
+		{
+			input: []Player{
+				{
+					IDPlayer:          uuid.New(),
+					FirstName:         "",
+					LastName:          "",
+					Level:             0,
+					Age:               0,
+					Position:          "",
+					PhysicalCondition: "",
+				},
+			},
+			output: "FirstName cant not be empty.",
+		},
+		{
+			input: []Player{
+				{
+					IDPlayer:          uuid.New(),
+					FirstName:         "Mateo",
+					LastName:          "",
+					Level:             80,
+					Age:               32,
+					Position:          "Delantero",
+					PhysicalCondition: "A+",
+				},
+			},
+			output: "LastName cant not be empty.",
+		},
+		{
+			input: []Player{
+				{
+					IDPlayer:          uuid.New(),
+					FirstName:         "Mateo",
+					LastName:          "Caicedo",
+					Level:             100,
+					Age:               32,
+					Position:          "Delantero",
+					PhysicalCondition: "A+",
+				},
+			},
+			output: "Level must be between 1 and 99.",
+		},
+		{
+			input: []Player{
+				{
+					IDPlayer:          uuid.New(),
+					FirstName:         "Mateo",
+					LastName:          "Caicedo",
+					Level:             99,
+					Age:               32,
+					Position:          "Sosa",
+					PhysicalCondition: "A+",
+				},
+			},
+			output: "Insert a valid Position.",
+		},
+		{
+			input: []Player{
+				{
+					IDPlayer:          uuid.New(),
+					FirstName:         "Mateo",
+					LastName:          "Caicedo",
+					Level:             99,
+					Age:               32,
+					Position:          "Sosa",
+					PhysicalCondition: "A+",
+				},
+			},
+			output: "Insert a valid Position.",
+		},
+		{
+			input: []Player{
+				{
+					IDPlayer:          uuid.New(),
+					FirstName:         "Mateo$",
+					LastName:          "Caicedo",
+					Level:             99,
+					Age:               32,
+					Position:          "Delantero",
+					PhysicalCondition: "A+",
+				},
+			},
+			output: "FirstName cant not contains caracters.",
+		},
+		{
+			input: []Player{
+				{
+					IDPlayer:          uuid.New(),
+					FirstName:         "Mateo3",
+					LastName:          "Caicedo",
+					Level:             99,
+					Age:               32,
+					Position:          "Delantero",
+					PhysicalCondition: "A+",
+				},
+			},
+			output: "FirstName cant not be a number.",
+		},
 	}
+
+	for _, test := range tests {
+		for _, player := range test.input {
+			response := player.Validate()
+			if response.Message != test.output {
+				t.Errorf("Expected %s, got %s", test.output, response.Message)
+			}
+		}
+	}
+
 }

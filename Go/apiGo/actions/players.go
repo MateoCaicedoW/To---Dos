@@ -20,6 +20,20 @@ func (h handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	result := map[string]interface{}{}
+
+	h.db.Table("player_team").Take(&result)
+	for i, player := range players {
+		idTempPlayer := player.IDPlayer.String()
+		idResultPlayer := result["player_id_player"].(string)
+		if idTempPlayer == idResultPlayer {
+			rola := result["team_id_team"].(string)
+			var team models.Team
+			h.db.First(&team, "id_team = ?", rola)
+			players[i].Teams = models.ListTeams{team}
+		}
+	}
+
 	response.Status = http.StatusSeeOther
 	response.Data = players
 	w.WriteHeader(http.StatusSeeOther)
@@ -82,7 +96,8 @@ func (h handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	var response models.PlayerResponse
 	var newPlayer models.Player
 	json.NewDecoder(r.Body).Decode(&newPlayer)
-	newPlayer.ID = uuid.New()
+	newPlayer.IDPlayer = uuid.New()
+
 	err := newPlayer.Validate()
 	if err.Message != "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -154,5 +169,6 @@ func findPlayer(h handler, idPlayer string, w http.ResponseWriter, response mode
 		err = result.Error
 		return
 	}
+
 	return
 }

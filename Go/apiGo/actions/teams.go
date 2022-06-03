@@ -47,7 +47,19 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	var response models.TeamResponse
 	var team models.Team
 	json.NewDecoder(r.Body).Decode(&team)
-	team.ID = uuid.New()
+	team.IDTeam = uuid.New()
+	var teams []models.Team
+	h.db.Find(&teams)
+	for _, t := range teams {
+		if t.Name == team.Name && t.Country == team.Country && t.Type == team.Type {
+			w.WriteHeader(http.StatusBadRequest)
+			response.Status = http.StatusBadRequest
+			response.Message = "Team already exists"
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+	}
+
 	err := team.Validate()
 	if err.Message != "" {
 		w.WriteHeader(http.StatusBadRequest)
