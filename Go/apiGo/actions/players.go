@@ -27,9 +27,9 @@ func (h handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 		idTempPlayer := player.IDPlayer.String()
 		idResultPlayer := result["player_id_player"].(string)
 		if idTempPlayer == idResultPlayer {
-			rola := result["team_id_team"].(string)
+			idTeam := result["team_id_team"].(string)
 			var team models.Team
-			h.db.First(&team, "id_team = ?", rola)
+			h.db.First(&team, "id_team = ?", idTeam)
 			players[i].Teams = models.ListTeams{team}
 		}
 	}
