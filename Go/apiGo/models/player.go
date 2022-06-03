@@ -20,22 +20,22 @@ var (
 	Dminus = "d-"
 
 	physicalConditions  = []string{Aplus, Aminus, Bplus, Bminus, Cplus, Cminus, Dplus, Dminus}
-	GoalKeeper          = "portero"
-	Defender            = "defensa"
-	CentralMidfielder   = "mediocentro"
-	Forward             = "delantero"
-	FullBack            = "lateralderecho"
-	HalfBack            = "lateralizquierdo"
-	DefensiveMidfielder = "mediodefensivo"
-	AttackingMidfielder = "medioofensivo"
-	CentreBack          = "centro"
-	Winger              = "extremo"
+	GoalKeeper          = "goalkeeper"
+	Defender            = "defender"
+	CentralMidfielder   = "centralmidfielder"
+	Forward             = "forward"
+	FullBack            = "fullback"
+	HalfBack            = "halfback"
+	DefensiveMidfielder = "defensivemidfielder"
+	AttackingMidfielder = "attackingmidfielder"
+	CentreBack          = "centreback"
+	Winger              = "winger"
 
 	positions = []string{GoalKeeper, Defender, CentralMidfielder, Forward, FullBack, HalfBack, DefensiveMidfielder, AttackingMidfielder, CentreBack, Winger}
 )
 
 type Player struct {
-	IDPlayer          uuid.UUID `gorm:"primary_key"`
+	ID                uuid.UUID `gorm:"primary_key"`
 	FirstName         string
 	LastName          string
 	Level             int64

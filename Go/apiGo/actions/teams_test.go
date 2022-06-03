@@ -54,7 +54,7 @@ func TestCreateTeam(t *testing.T) {
 	DB := db.Init()
 	h := New(DB)
 	newTeam := models.Team{
-		IDTeam:  uuid.New(),
+		ID:      uuid.New(),
 		Name:    "Italia",
 		Type:    "Seleccion",
 		Country: "",

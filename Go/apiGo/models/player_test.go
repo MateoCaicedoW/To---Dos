@@ -16,7 +16,7 @@ func Test_validate(t *testing.T) {
 		{
 			input: []Player{
 				{
-					IDPlayer:          uuid.New(),
+					ID:                uuid.New(),
 					FirstName:         "",
 					LastName:          "",
 					Level:             0,
@@ -30,7 +30,7 @@ func Test_validate(t *testing.T) {
 		{
 			input: []Player{
 				{
-					IDPlayer:          uuid.New(),
+					ID:                uuid.New(),
 					FirstName:         "Mateo",
 					LastName:          "",
 					Level:             80,
@@ -44,7 +44,7 @@ func Test_validate(t *testing.T) {
 		{
 			input: []Player{
 				{
-					IDPlayer:          uuid.New(),
+					ID:                uuid.New(),
 					FirstName:         "Mateo",
 					LastName:          "Caicedo",
 					Level:             100,
@@ -58,7 +58,7 @@ func Test_validate(t *testing.T) {
 		{
 			input: []Player{
 				{
-					IDPlayer:          uuid.New(),
+					ID:                uuid.New(),
 					FirstName:         "Mateo",
 					LastName:          "Caicedo",
 					Level:             99,
@@ -72,7 +72,7 @@ func Test_validate(t *testing.T) {
 		{
 			input: []Player{
 				{
-					IDPlayer:          uuid.New(),
+					ID:                uuid.New(),
 					FirstName:         "Mateo",
 					LastName:          "Caicedo",
 					Level:             99,
@@ -86,7 +86,7 @@ func Test_validate(t *testing.T) {
 		{
 			input: []Player{
 				{
-					IDPlayer:          uuid.New(),
+					ID:                uuid.New(),
 					FirstName:         "Mateo$",
 					LastName:          "Caicedo",
 					Level:             99,
@@ -100,7 +100,7 @@ func Test_validate(t *testing.T) {
 		{
 			input: []Player{
 				{
-					IDPlayer:          uuid.New(),
+					ID:                uuid.New(),
 					FirstName:         "Mateo3",
 					LastName:          "Caicedo",
 					Level:             99,

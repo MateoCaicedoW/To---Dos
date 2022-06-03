@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	National = "seleccion"
+	National = "national"
 	Club     = "club"
 
 	types = []string{National, Club}
 )
 
 type Team struct {
-	IDTeam  uuid.UUID `gorm:"primary_key"`
+	ID      uuid.UUID `gorm:"primary_key"`
 	Name    string
 	Type    string
 	Country string
@@ -81,7 +81,7 @@ func (t *Team) validateType() (response TeamResponse) {
 		return
 	}
 
-	response.Message = "Type must be Seleccion or Club."
+	response.Message = "Type must be National or Club."
 	return
 }
 

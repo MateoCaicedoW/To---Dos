@@ -60,7 +60,7 @@ func TestCreatePlayer(t *testing.T) {
 	DB := db.Init()
 	h := New(DB)
 	newplayer := models.Player{
-		IDPlayer:          uuid.New(),
+		ID:                uuid.New(),
 		FirstName:         "John",
 		LastName:          "Riqui",
 		Level:             2,

@@ -31,8 +31,8 @@ func (h handler) ShowTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var response models.TeamResponse
 	params := mux.Vars(r)
-	idTeam := params["id"]
-	team, err := findTeam(h, idTeam, w, response)
+	ID := params["id"]
+	team, err := findTeam(h, ID, w, response)
 	if err != nil {
 		return
 	}
@@ -47,7 +47,7 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	var response models.TeamResponse
 	var team models.Team
 	json.NewDecoder(r.Body).Decode(&team)
-	team.IDTeam = uuid.New()
+	team.ID = uuid.New()
 	var teams []models.Team
 	h.db.Find(&teams)
 	for _, t := range teams {
@@ -84,10 +84,10 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 func (h handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	idTeam := params["id"]
+	ID := params["id"]
 
 	var response models.TeamResponse
-	team, err := findTeam(h, idTeam, w, response)
+	team, err := findTeam(h, ID, w, response)
 	if err != nil {
 		return
 	}
@@ -115,11 +115,11 @@ func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
-	idTeam := params["id"]
+	ID := params["id"]
 	var response models.TeamResponse
 	var tempUpdate models.Team
 	json.NewDecoder(r.Body).Decode(&tempUpdate)
-	team, err := findTeam(h, idTeam, w, response)
+	team, err := findTeam(h, ID, w, response)
 	if err != nil {
 		return
 	}
@@ -147,9 +147,9 @@ func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func findTeam(h handler, idTeam string, w http.ResponseWriter, response models.TeamResponse) (team models.Team, err error) {
+func findTeam(h handler, ID string, w http.ResponseWriter, response models.TeamResponse) (team models.Team, err error) {
 
-	if result := h.db.First(&team, &idTeam); result.Error != nil {
+	if result := h.db.First(&team, &ID); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusNotFound

@@ -18,7 +18,7 @@ func Test_validateTeam(t *testing.T) {
 		{
 			input: []Team{
 				{
-					IDTeam:  uuid.New(),
+					ID:      uuid.New(),
 					Name:    "",
 					Type:    "",
 					Country: "",
@@ -29,7 +29,7 @@ func Test_validateTeam(t *testing.T) {
 		{
 			input: []Team{
 				{
-					IDTeam:  uuid.New(),
+					ID:      uuid.New(),
 					Name:    "Junior",
 					Type:    "Club",
 					Country: "",
@@ -40,7 +40,7 @@ func Test_validateTeam(t *testing.T) {
 		{
 			input: []Team{
 				{
-					IDTeam:  uuid.New(),
+					ID:      uuid.New(),
 					Name:    "Colombia#",
 					Type:    "Seleccion",
 					Country: "",
@@ -51,7 +51,7 @@ func Test_validateTeam(t *testing.T) {
 		{
 			input: []Team{
 				{
-					IDTeam:  uuid.New(),
+					ID:      uuid.New(),
 					Name:    "Colombia",
 					Type:    "Seleccion$",
 					Country: "",
@@ -62,7 +62,7 @@ func Test_validateTeam(t *testing.T) {
 		{
 			input: []Team{
 				{
-					IDTeam:  uuid.New(),
+					ID:      uuid.New(),
 					Name:    "Colombia",
 					Type:    "Seleccion",
 					Country: "Colombia",
