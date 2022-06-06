@@ -2,8 +2,8 @@ package actions
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -16,26 +16,12 @@ func (h handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if result := h.db.Find(&players); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		response.Message = result.Error.Error()
+		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusInternalServerError
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	var result []models.PlayerTeam
-	//h.db.Raw("SELECT * FROM player_team").Scan(&result)
-	h.db.Table("player_team").Find(&result)
-	//log.Println(result)
-	for i, player := range players {
-		idTempPlayer := player.ID.String()
-		idResultPlayer := result[i].PlayerID.String()
-		if idTempPlayer == idResultPlayer {
-			idTeam := result[i].TeamID.String()
-			var team []models.Team
-			h.db.First(&team, "id = ?", idTeam)
-			players[i].Teams = team
-		}
-	}
-
+	h.db.Preload("Teams").Find(&players)
 	response.Status = http.StatusSeeOther
 	response.Data = players
 	w.WriteHeader(http.StatusSeeOther)
@@ -53,18 +39,7 @@ func (h handler) ShowPlayer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	var result []models.PlayerTeam
-	//h.db.Raw("SELECT * FROM player_team").Scan(&result)
-	h.db.Table("player_team").Find(&result)
-
-	for _, item := range result {
-		if item.PlayerID.String() == idPlayer {
-			var team []models.Team
-			h.db.First(&team, "id = ?", item.TeamID)
-			player.Teams = team
-		}
-	}
-
+	h.db.Preload("Teams").Find(&player)
 	response.Status = http.StatusAccepted
 	response.Data = models.ListPlayers{player}
 	w.WriteHeader(http.StatusAccepted)
@@ -82,21 +57,24 @@ func (h handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.db.Model(&player).Association("Teams").Clear()
 	if result := h.db.Delete(&player); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
-		response.Message = result.Error.Error()
+		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusBadGateway
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
 	var players []models.Player
 	if result := h.db.Find(&players); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		response.Message = result.Error.Error()
+		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusInternalServerError
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	h.db.Preload("Teams").Find(&players)
 	w.WriteHeader(http.StatusOK)
 	response.Status = http.StatusOK
 	response.Data = players
@@ -118,66 +96,64 @@ func (h handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var teamTemp []models.Team
+	teams, response := findTeamPlayer(h, w, newPlayer)
 
-	for i := range newPlayer.Teams {
+	if response.Status != http.StatusOK {
 
-		nameTeam := newPlayer.Teams[i].Name
-
-		if result := h.db.First(&teamTemp, "name = ?", nameTeam); result.Error != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			response.Message = result.Error.Error()
-			response.Status = http.StatusBadRequest
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		log.Println(teamTemp)
-	}
-
-	log.Println(teamTemp)
-	//newPlayer.Teams = teamTemp
-
-	// if result := h.db.Create(&newPlayer); result.Error != nil {
-	// 	w.WriteHeader(http.StatusBadGateway)
-	// 	response.Message = result.Error.Error()
-	// 	response.Status = http.StatusBadGateway
-	// 	json.NewEncoder(w).Encode(response)
-	// 	return
-	// }
-
-	response.Status = http.StatusOK
-	response.Data = models.ListPlayers{newPlayer}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
-
-}
-
-func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var response models.PlayerResponse
-	params := mux.Vars(r)
-	idPlayer := params["id"]
-
-	var tempUpdate models.Player
-	json.NewDecoder(r.Body).Decode(&tempUpdate)
-
-	player, err := findPlayer(h, idPlayer, w, response)
-	if err != nil {
 		return
 	}
-	err2 := tempUpdate.Validate()
-	if err2.Message != "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-	if result := h.db.Model(&player).Updates(tempUpdate); result.Error != nil {
+	newPlayer.Teams = teams
+
+	if result := h.db.Create(&newPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusBadGateway
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
+	response.Status = http.StatusOK
+	response.Data = models.ListPlayers{newPlayer}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	idPlayer := params["id"]
+	w.Header().Set("Content-Type", "application/json")
+	var response models.PlayerResponse
+	var newPlayer models.Player
+	json.NewDecoder(r.Body).Decode(&newPlayer)
+
+	player, err2 := findPlayer(h, idPlayer, w, response)
+	if err2 != nil {
+		return
+	}
+
+	err := newPlayer.Validate()
+	if err.Message != "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	teams, response := findTeamPlayer(h, w, newPlayer)
+
+	if response.Status != http.StatusOK {
+		return
+	}
+	newPlayer.Teams = teams
+	//player.Teams = teams
+	if result := h.db.Model(&player).Updates(newPlayer); result.Error != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		response.Message = result.Error.Error()
+		response.Status = http.StatusBadGateway
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	h.db.Model(&player).Association("Teams").Replace(teams)
 	w.WriteHeader(http.StatusCreated)
 	response.Status = http.StatusCreated
 	response.Data = models.ListPlayers{player}
@@ -185,23 +161,67 @@ func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// func response(data models.ListPlayers, status int, message string) (response models.PlayerResponse) {
-// 	response.Data = data
-// 	response.Status = status
-// 	response.Message = message
-// 	return
-// }
+func (h handler) allTeams() (teams []models.Team) {
+	h.db.Find(&teams)
+	return
+}
 
 func findPlayer(h handler, idPlayer string, w http.ResponseWriter, response models.PlayerResponse) (player models.Player, err error) {
 
 	if result := h.db.First(&player, &idPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		response.Message = result.Error.Error()
+		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusNotFound
 		json.NewEncoder(w).Encode(response)
 		err = result.Error
 		return
 	}
 
+	return
+}
+
+func findTeamPlayer(h handler, w http.ResponseWriter, tempUpdate models.Player) (teams []models.Team, response models.PlayerResponse) {
+	var count int
+	for i := range tempUpdate.Teams {
+
+		nameTeam := strings.Replace(strings.ToLower(tempUpdate.Teams[i].Name), " ", "", -1)
+		var teamTemp models.Team
+
+		if result := h.db.Raw("SELECT * FROM teams WHERE name = ?", nameTeam).Scan(&teamTemp); result.Error != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			response.Message = strings.ToTitle(result.Error.Error())
+			response.Status = http.StatusBadRequest
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		if len(teamTemp.Name) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			response.Message = strings.ToTitle(nameTeam) + " not found"
+			response.Status = http.StatusBadRequest
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		allteams := h.allTeams()
+
+		for _, item := range allteams {
+			if item.Name == nameTeam {
+				if strings.Replace(strings.ToLower(item.Type), " ", "", -1) == models.Club {
+					count++
+				}
+			}
+		}
+		if count == 2 {
+			w.WriteHeader(http.StatusBadRequest)
+			response.Message = "Teams must be a club and a national team"
+			response.Status = http.StatusBadRequest
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		teams = append(teams, teamTemp)
+
+	}
+	response.Status = http.StatusOK
 	return
 }

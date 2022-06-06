@@ -35,17 +35,18 @@ var (
 )
 
 type Player struct {
-	ID                uuid.UUID `gorm:"primary_key"`
+	ID                uuid.UUID `gorm:"primary_key; not null; unique"`
 	FirstName         string
 	LastName          string
 	Level             int64
 	Age               int64
 	Position          string
 	PhysicalCondition string
-	Teams             []Team `gorm:"many2many:player_team;"`
+	Teams             []Team `gorm:"many2many:player_teams;"`
 }
 
 func (p *Player) Validate() (response PlayerResponse) {
+
 	letters := regexp.MustCompile("^[a-zA-Z]+$")
 	name := strings.Replace(strings.ToLower(p.FirstName), " ", "", -1)
 	lastName := strings.Replace(strings.ToLower(p.LastName), " ", "", -1)
@@ -53,7 +54,7 @@ func (p *Player) Validate() (response PlayerResponse) {
 	response.Status = http.StatusBadRequest
 
 	if name == "" {
-		response.Message = "FirstName cant not be empty."
+		response.Message = "FirstName can not be empty."
 		return
 	}
 
@@ -68,7 +69,7 @@ func (p *Player) Validate() (response PlayerResponse) {
 	}
 
 	if lastName == "" {
-		response.Message = "LastName cant not be empty."
+		response.Message = "LastName can not be empty."
 		return
 	}
 
@@ -95,6 +96,11 @@ func (p *Player) Validate() (response PlayerResponse) {
 		response.Message = p.validatePhysicalCondition().Message
 		return
 	}
+	if p.validateTeams().Message != "" {
+		response.Message = p.validateTeams().Message
+		return
+	}
+
 	response.Message = ""
 	return
 
@@ -105,11 +111,11 @@ func (p *Player) validatePhysicalCondition() (response PlayerResponse) {
 	response.Status = http.StatusBadRequest
 	physicalCondition := strings.Trim(strings.ToLower(p.PhysicalCondition), " ")
 	if physicalCondition == "" {
-		response.Message = "PhysicalCondition cant not be empty."
+		response.Message = "PhysicalCondition can not be empty."
 		return
 	}
 	if physicalCondition != "" && numbers.MatchString(physicalCondition) {
-		response.Message = "PhysicalCondition cant not be a number."
+		response.Message = "PhysicalCondition can not be a number."
 		return
 	}
 
@@ -129,11 +135,11 @@ func (p *Player) numbersAndCaracters(param string, field string) (response Playe
 	if param != "" {
 		for _, item := range strings.Split(param, "") {
 			if caracters.MatchString(item) {
-				response.Message = field + " cant not contains caracters."
+				response.Message = field + " can not contains caracters."
 				return
 			}
 			if numbers.MatchString(item) {
-				response.Message = field + " cant not be a number."
+				response.Message = field + " can not be a number."
 				return
 			}
 		}
@@ -143,17 +149,40 @@ func (p *Player) numbersAndCaracters(param string, field string) (response Playe
 	return
 }
 
+func (p *Player) validateTeams() (response PlayerResponse) {
+	response.Status = http.StatusBadRequest
+	if len(p.Teams) == 0 {
+		response.Message = "Teams can not be empty."
+		return
+	}
+	if len(p.Teams) > 2 {
+		response.Message = "Teams can not be greater than 2."
+		return
+	}
+
+	if len(p.Teams) > 1 && p.Teams[0].Name == p.Teams[1].Name {
+		response.Message = "Teams can not be the same."
+		return
+	}
+	if len(p.Teams) > 1 && len(p.Teams[1].Name) == 0 || len(p.Teams[0].Name) == 0 {
+		response.Message = "Teams can not be empty."
+		return
+	}
+	response.Message = ""
+	return
+}
+
 func (p *Player) validatePosition() (response PlayerResponse) {
 	numbers := regexp.MustCompile("^[0-9]+$")
 	response.Status = http.StatusBadRequest
 	position := strings.Replace(strings.ToLower(p.Position), " ", "", -1)
 	if position == "" {
-		response.Message = "Position cant not be empty."
+		response.Message = "Position can not be empty."
 		return
 
 	}
 	if position != "" && numbers.MatchString(position) {
-		response.Message = "Position cant not be a number."
+		response.Message = "Position can not be a number."
 		return
 	}
 

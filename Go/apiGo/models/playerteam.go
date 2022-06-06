@@ -3,6 +3,7 @@ package models
 import "github.com/google/uuid"
 
 type PlayerTeam struct {
-	PlayerID uuid.UUID
+	ID       int `gorm:"primary_key; auto_increment"`
 	TeamID   uuid.UUID
+	PlayerID uuid.UUID
 }

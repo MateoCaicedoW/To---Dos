@@ -3,6 +3,7 @@ package actions
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -48,6 +49,9 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	var team models.Team
 	json.NewDecoder(r.Body).Decode(&team)
 	team.ID = uuid.New()
+	team.Name = strings.Replace(strings.ToLower(team.Name), " ", "", -1)
+	team.Type = strings.Replace(strings.ToLower(team.Type), " ", "", -1)
+	team.Country = strings.Replace(strings.ToLower(team.Country), " ", "", -1)
 	var teams []models.Team
 	h.db.Find(&teams)
 	for _, t := range teams {

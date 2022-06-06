@@ -16,11 +16,10 @@ var (
 )
 
 type Team struct {
-	ID      uuid.UUID `gorm:"primary_key"`
+	ID      uuid.UUID `gorm:"primary_key; not null; unique"`
 	Name    string
 	Type    string
 	Country string
-	Players []Player `gorm:"many2many:player_team;"`
 }
 
 func (t *Team) Validate() (response TeamResponse) {
