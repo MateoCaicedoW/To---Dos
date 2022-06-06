@@ -42,7 +42,7 @@ func Test_validateTeam(t *testing.T) {
 				{
 					ID:      uuid.New(),
 					Name:    "Colombia#",
-					Type:    "Seleccion",
+					Type:    "National",
 					Country: "",
 				},
 			},
@@ -53,7 +53,7 @@ func Test_validateTeam(t *testing.T) {
 				{
 					ID:      uuid.New(),
 					Name:    "Colombia",
-					Type:    "Seleccion$",
+					Type:    "National$",
 					Country: "",
 				},
 			},
@@ -64,11 +64,11 @@ func Test_validateTeam(t *testing.T) {
 				{
 					ID:      uuid.New(),
 					Name:    "Colombia",
-					Type:    "Seleccion",
+					Type:    "National",
 					Country: "Colombia",
 				},
 			},
-			output: "Country must be empty if Type is Seleccion.",
+			output: "Country must be empty if Type is National.",
 		},
 	}
 

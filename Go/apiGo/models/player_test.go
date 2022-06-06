@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"testing"
 
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ func Test_validate(t *testing.T) {
 					PhysicalCondition: "",
 				},
 			},
-			output: "FirstName cant not be empty.",
+			output: "FirstName can not be empty.",
 		},
 		{
 			input: []Player{
@@ -35,11 +36,11 @@ func Test_validate(t *testing.T) {
 					LastName:          "",
 					Level:             80,
 					Age:               32,
-					Position:          "Delantero",
+					Position:          "Forward",
 					PhysicalCondition: "A+",
 				},
 			},
-			output: "LastName cant not be empty.",
+			output: "LastName can not be empty.",
 		},
 		{
 			input: []Player{
@@ -49,7 +50,7 @@ func Test_validate(t *testing.T) {
 					LastName:          "Caicedo",
 					Level:             100,
 					Age:               32,
-					Position:          "Delantero",
+					Position:          "Forward",
 					PhysicalCondition: "A+",
 				},
 			},
@@ -91,11 +92,11 @@ func Test_validate(t *testing.T) {
 					LastName:          "Caicedo",
 					Level:             99,
 					Age:               32,
-					Position:          "Delantero",
+					Position:          "Forward",
 					PhysicalCondition: "A+",
 				},
 			},
-			output: "FirstName cant not contains caracters.",
+			output: "FirstName can not contains caracters.",
 		},
 		{
 			input: []Player{
@@ -105,20 +106,75 @@ func Test_validate(t *testing.T) {
 					LastName:          "Caicedo",
 					Level:             99,
 					Age:               32,
-					Position:          "Delantero",
+					Position:          "Forward",
 					PhysicalCondition: "A+",
 				},
 			},
-			output: "FirstName cant not be a number.",
+			output: "FirstName can not be a number.",
+		},
+		{
+			input: []Player{
+				{
+					ID:                uuid.New(),
+					FirstName:         "Mateo",
+					LastName:          "Caicedo",
+					Level:             99,
+					Age:               32,
+					Position:          "Forward",
+					PhysicalCondition: "A+",
+					Teams: []Team{
+						{},
+					},
+				},
+			},
+			output: "Teams can not be empty.",
+		},
+		{
+			input: []Player{
+				{
+					ID:                uuid.New(),
+					FirstName:         "Mateo",
+					LastName:          "Caicedo",
+					Level:             99,
+					Age:               32,
+					Position:          "Forward",
+					PhysicalCondition: "A+",
+					Teams: []Team{
+						{Name: "junior"},
+						{Name: "junior"},
+						{Name: "junior"},
+					},
+				},
+			},
+			output: "Teams can not be greater than 2.",
+		},
+		{
+			input: []Player{
+				{
+					ID:                uuid.New(),
+					FirstName:         "Mateo",
+					LastName:          "Caicedo",
+					Level:             99,
+					Age:               32,
+					Position:          "Forward",
+					PhysicalCondition: "A+",
+					Teams: []Team{
+						{Name: "junior"},
+						{Name: "junior"},
+					},
+				},
+			},
+			output: "Teams can not be the same.",
 		},
 	}
 
-	for _, test := range tests {
+	for i, test := range tests {
 		for _, player := range test.input {
 			response := player.Validate()
 			if response.Message != test.output {
 				t.Errorf("Expected %s, got %s", test.output, response.Message)
 			}
+			log.Printf("Test %d: %v", i, response)
 		}
 	}
 

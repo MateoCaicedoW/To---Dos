@@ -50,7 +50,7 @@ func (t *Team) Validate() (response TeamResponse) {
 		return
 	}
 	if typeTeam != Club && countryTeam != "" {
-		response.Message = "Country must be empty if Type is Seleccion."
+		response.Message = "Country must be empty if Type is National."
 		return
 	}
 
