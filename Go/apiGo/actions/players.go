@@ -137,7 +137,7 @@ func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handler.db.Model(&player).Association("Teams").Replace(teams)
+	//handler.db.Model(&player).Association("Teams").Replace(teams)
 	w.WriteHeader(http.StatusCreated)
 	response.Status = http.StatusCreated
 	response.Data = models.ListPlayers{player}
@@ -150,7 +150,8 @@ func (handler handler) allTeams() (teams []models.Team) {
 	return
 }
 
-func findPlayer(handler handler, idPlayer string, w http.ResponseWriter, response models.PlayerResponse) (player models.Player, err error) {
+func findPlayer(handler handler, idPlayer string, w http.ResponseWriter,
+	response models.PlayerResponse) (player models.Player, err error) {
 	handler.db.Preload("Teams").Find(&player, "id = ?", idPlayer)
 	if player.FirstName == "" {
 		w.WriteHeader(http.StatusNotFound)
@@ -165,7 +166,8 @@ func findPlayer(handler handler, idPlayer string, w http.ResponseWriter, respons
 	return
 }
 
-func listAllPlayers(handler handler, w http.ResponseWriter, response models.PlayerResponse) (players []models.Player) {
+func listAllPlayers(handler handler, w http.ResponseWriter,
+	response models.PlayerResponse) (players []models.Player) {
 	if result := handler.db.Preload("Teams").Find(&players); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = strings.ToTitle(result.Error.Error())
@@ -176,7 +178,8 @@ func listAllPlayers(handler handler, w http.ResponseWriter, response models.Play
 	return
 }
 
-func findTeamPlayer(handler handler, w http.ResponseWriter, tempUpdate models.Player) (teams []models.Team, response models.PlayerResponse) {
+func findTeamPlayer(handler handler, w http.ResponseWriter,
+	tempUpdate models.Player) (teams []models.Team, response models.PlayerResponse) {
 	var count int
 	for i := range tempUpdate.Teams {
 

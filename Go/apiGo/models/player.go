@@ -151,10 +151,10 @@ func (p *Player) numbersAndCaracters(param string, field string) (response Playe
 
 func (p *Player) validateTeams() (response PlayerResponse) {
 	response.Status = http.StatusBadRequest
-	if len(p.Teams) == 0 {
-		response.Message = "Teams can not be empty."
-		return
-	}
+	// if len(p.Teams) == 0 {
+	// 	response.Message = "Teams can not be empty."
+	// 	return
+	// }
 	if len(p.Teams) > 2 {
 		response.Message = "Teams can not be greater than 2."
 		return
@@ -164,10 +164,10 @@ func (p *Player) validateTeams() (response PlayerResponse) {
 		response.Message = "Teams can not be the same."
 		return
 	}
-	if len(p.Teams) > 1 && len(p.Teams[1].Name) == 0 || len(p.Teams[0].Name) == 0 {
-		response.Message = "Teams can not be empty."
-		return
-	}
+	// if len(p.Teams) > 1 && len(p.Teams[1].Name) == 0 || len(p.Teams[0].Name) == 0 {
+	// 	response.Message = "Teams can not be empty."
+	// 	return
+	// }
 	response.Message = ""
 	return
 }
