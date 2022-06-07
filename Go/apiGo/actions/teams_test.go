@@ -26,7 +26,7 @@ func TestShowTeam(t *testing.T) {
 	}
 	server.ListenAndServe()
 	requestresponse := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/teams/b471f072-6679-43da-bfdb-2144b001a5ee", nil)
+	req := httptest.NewRequest("GET", "/teams/aed3c9e6-4981-41f5-b587-57be70341744", nil)
 	server.Handler.ServeHTTP(requestresponse, req)
 	if status := requestresponse.Code; status != http.StatusAccepted {
 		t.Errorf("handler returned wrong status code: got %v want %v",
@@ -56,7 +56,7 @@ func TestCreateTeam(t *testing.T) {
 	newTeam := models.Team{
 		ID:      uuid.New(),
 		Name:    "Italia",
-		Type:    "Seleccion",
+		Type:    "National",
 		Country: "",
 	}
 
@@ -87,7 +87,7 @@ func TestUpdateTeam(t *testing.T) {
 	h := New(DB)
 	newTeam := models.Team{
 		Name:    "Germany",
-		Type:    "Seleccion",
+		Type:    "National",
 		Country: "",
 	}
 
@@ -102,7 +102,7 @@ func TestUpdateTeam(t *testing.T) {
 		Addr:    ":3000",
 		Handler: router,
 	}
-	req, err := http.NewRequest(http.MethodPut, "/teams/98d643d5-2de6-486f-becf-ad23fd89d845", bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest(http.MethodPut, "/teams/514e628b-4de1-4890-b363-8500c9ae5067", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestDeleteTeam(t *testing.T) {
 		Addr:    ":3000",
 		Handler: router,
 	}
-	req, err := http.NewRequest(http.MethodDelete, "/teams/98d643d5-2de6-486f-becf-ad23fd89d845", nil)
+	req, err := http.NewRequest(http.MethodDelete, "/teams/514e628b-4de1-4890-b363-8500c9ae5067", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
