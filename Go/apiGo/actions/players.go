@@ -14,14 +14,14 @@ func (handler handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 	var players []models.Player
 	var response models.PlayerResponse
 	w.Header().Set("Content-Type", "application/json")
-	if result := handler.db.Find(&players); result.Error != nil {
+
+	if result := handler.db.Preload("Teams").Find(&players); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusInternalServerError
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	handler.db.Preload("Teams").Find(&players)
 	response.Status = http.StatusSeeOther
 	response.Data = players
 	w.WriteHeader(http.StatusSeeOther)
@@ -39,7 +39,7 @@ func (handler handler) ShowPlayer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	handler.db.Preload("Teams").Find(&player)
+
 	response.Status = http.StatusAccepted
 	response.Data = models.ListPlayers{player}
 	w.WriteHeader(http.StatusAccepted)
@@ -66,19 +66,9 @@ func (handler handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var players []models.Player
-	if result := handler.db.Find(&players); result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		response.Message = strings.ToTitle(result.Error.Error())
-		response.Status = http.StatusInternalServerError
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-	handler.db.Preload("Teams").Find(&players)
 	w.WriteHeader(http.StatusOK)
 	response.Status = http.StatusOK
-	response.Data = players
-	json.NewEncoder(w).Encode(response)
+	handler.ListPlayers(w, r)
 
 }
 
@@ -99,7 +89,6 @@ func (handler handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	teams, response := findTeamPlayer(handler, w, newPlayer)
 
 	if response.Status != http.StatusOK {
-
 		return
 	}
 	newPlayer.Teams = teams
@@ -125,15 +114,15 @@ func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	var newPlayer models.Player
 	json.NewDecoder(r.Body).Decode(&newPlayer)
 
-	player, err2 := findPlayer(handler, idPlayer, w, response)
-	if err2 != nil {
+	player, err1 := findPlayer(handler, idPlayer, w, response)
+	if err1 != nil {
 		return
 	}
 
-	err := newPlayer.Validate()
-	if err.Message != "" {
+	err2 := newPlayer.Validate()
+	if err2.Message != "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err)
+		json.NewEncoder(w).Encode(err2)
 		return
 	}
 
@@ -152,7 +141,14 @@ func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handler.db.Model(&player).Association("Teams").Replace(teams)
+	if result := handler.db.Model(&player).Association("Teams").Replace(teams); result.Error() != "" {
+		w.WriteHeader(http.StatusBadGateway)
+		response.Message = result.Error()
+		response.Status = http.StatusBadGateway
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 	response.Status = http.StatusCreated
 	response.Data = models.ListPlayers{player}
@@ -167,12 +163,11 @@ func (handler handler) allTeams() (teams []models.Team) {
 
 func findPlayer(handler handler, idPlayer string, w http.ResponseWriter, response models.PlayerResponse) (player models.Player, err error) {
 
-	if result := handler.db.First(&player, &idPlayer); result.Error != nil {
+	if result := handler.db.Preload("Teams").Find(&player, "id = ?", idPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
 		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusNotFound
 		json.NewEncoder(w).Encode(response)
-		err = result.Error
 		return
 	}
 
