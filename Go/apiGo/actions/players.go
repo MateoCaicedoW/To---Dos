@@ -10,18 +10,18 @@ import (
 	"github.com/mateo/apiGo/models"
 )
 
-func (h handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
+func (handler handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 	var players []models.Player
 	var response models.PlayerResponse
 	w.Header().Set("Content-Type", "application/json")
-	if result := h.db.Find(&players); result.Error != nil {
+	if result := handler.db.Find(&players); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusInternalServerError
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	h.db.Preload("Teams").Find(&players)
+	handler.db.Preload("Teams").Find(&players)
 	response.Status = http.StatusSeeOther
 	response.Data = players
 	w.WriteHeader(http.StatusSeeOther)
@@ -29,17 +29,17 @@ func (h handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h handler) ShowPlayer(w http.ResponseWriter, r *http.Request) {
+func (handler handler) ShowPlayer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var response models.PlayerResponse
 
 	params := mux.Vars(r)
 	idPlayer := params["id"]
-	player, err := findPlayer(h, idPlayer, w, response)
+	player, err := findPlayer(handler, idPlayer, w, response)
 	if err != nil {
 		return
 	}
-	h.db.Preload("Teams").Find(&player)
+	handler.db.Preload("Teams").Find(&player)
 	response.Status = http.StatusAccepted
 	response.Data = models.ListPlayers{player}
 	w.WriteHeader(http.StatusAccepted)
@@ -47,18 +47,18 @@ func (h handler) ShowPlayer(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
+func (handler handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var response models.PlayerResponse
 	params := mux.Vars(r)
 	idPlayer := params["id"]
-	player, err := findPlayer(h, idPlayer, w, response)
+	player, err := findPlayer(handler, idPlayer, w, response)
 	if err != nil {
 		return
 	}
 
-	h.db.Model(&player).Association("Teams").Clear()
-	if result := h.db.Delete(&player); result.Error != nil {
+	handler.db.Model(&player).Association("Teams").Clear()
+	if result := handler.db.Delete(&player); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusBadGateway
@@ -67,14 +67,14 @@ func (h handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var players []models.Player
-	if result := h.db.Find(&players); result.Error != nil {
+	if result := handler.db.Find(&players); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusInternalServerError
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	h.db.Preload("Teams").Find(&players)
+	handler.db.Preload("Teams").Find(&players)
 	w.WriteHeader(http.StatusOK)
 	response.Status = http.StatusOK
 	response.Data = players
@@ -82,7 +82,7 @@ func (h handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
+func (handler handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var response models.PlayerResponse
 	var newPlayer models.Player
@@ -96,7 +96,7 @@ func (h handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	teams, response := findTeamPlayer(h, w, newPlayer)
+	teams, response := findTeamPlayer(handler, w, newPlayer)
 
 	if response.Status != http.StatusOK {
 
@@ -104,21 +104,20 @@ func (h handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 	newPlayer.Teams = teams
 
-	if result := h.db.Create(&newPlayer); result.Error != nil {
+	if result := handler.db.Create(&newPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusBadGateway
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-
 	response.Status = http.StatusOK
 	response.Data = models.ListPlayers{newPlayer}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
+func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	idPlayer := params["id"]
 	w.Header().Set("Content-Type", "application/json")
@@ -126,7 +125,7 @@ func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	var newPlayer models.Player
 	json.NewDecoder(r.Body).Decode(&newPlayer)
 
-	player, err2 := findPlayer(h, idPlayer, w, response)
+	player, err2 := findPlayer(handler, idPlayer, w, response)
 	if err2 != nil {
 		return
 	}
@@ -138,14 +137,14 @@ func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	teams, response := findTeamPlayer(h, w, newPlayer)
+	teams, response := findTeamPlayer(handler, w, newPlayer)
 
 	if response.Status != http.StatusOK {
 		return
 	}
 	newPlayer.Teams = teams
 	//player.Teams = teams
-	if result := h.db.Model(&player).Updates(newPlayer); result.Error != nil {
+	if result := handler.db.Model(&player).Updates(newPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusBadGateway
@@ -153,7 +152,7 @@ func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.db.Model(&player).Association("Teams").Replace(teams)
+	handler.db.Model(&player).Association("Teams").Replace(teams)
 	w.WriteHeader(http.StatusCreated)
 	response.Status = http.StatusCreated
 	response.Data = models.ListPlayers{player}
@@ -161,14 +160,14 @@ func (h handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h handler) allTeams() (teams []models.Team) {
-	h.db.Find(&teams)
+func (handler handler) allTeams() (teams []models.Team) {
+	handler.db.Find(&teams)
 	return
 }
 
-func findPlayer(h handler, idPlayer string, w http.ResponseWriter, response models.PlayerResponse) (player models.Player, err error) {
+func findPlayer(handler handler, idPlayer string, w http.ResponseWriter, response models.PlayerResponse) (player models.Player, err error) {
 
-	if result := h.db.First(&player, &idPlayer); result.Error != nil {
+	if result := handler.db.First(&player, &idPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
 		response.Message = strings.ToTitle(result.Error.Error())
 		response.Status = http.StatusNotFound
@@ -180,14 +179,14 @@ func findPlayer(h handler, idPlayer string, w http.ResponseWriter, response mode
 	return
 }
 
-func findTeamPlayer(h handler, w http.ResponseWriter, tempUpdate models.Player) (teams []models.Team, response models.PlayerResponse) {
+func findTeamPlayer(handler handler, w http.ResponseWriter, tempUpdate models.Player) (teams []models.Team, response models.PlayerResponse) {
 	var count int
 	for i := range tempUpdate.Teams {
 
 		nameTeam := strings.Replace(strings.ToLower(tempUpdate.Teams[i].Name), " ", "", -1)
 		var teamTemp models.Team
 
-		if result := h.db.Raw("SELECT * FROM teams WHERE name = ?", nameTeam).Scan(&teamTemp); result.Error != nil {
+		if result := handler.db.Raw("SELECT * FROM teams WHERE name = ?", nameTeam).Scan(&teamTemp); result.Error != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			response.Message = strings.ToTitle(result.Error.Error())
 			response.Status = http.StatusBadRequest
@@ -202,7 +201,7 @@ func findTeamPlayer(h handler, w http.ResponseWriter, tempUpdate models.Player) 
 			json.NewEncoder(w).Encode(response)
 			return
 		}
-		allteams := h.allTeams()
+		allteams := handler.allTeams()
 
 		for _, item := range allteams {
 			if item.Name == nameTeam {

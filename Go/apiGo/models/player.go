@@ -35,7 +35,7 @@ var (
 )
 
 type Player struct {
-	ID                uuid.UUID `gorm:"primary_key; not null; unique"`
+	ID                uuid.UUID `gorm:"primary_key; not null; type:uuid"`
 	FirstName         string
 	LastName          string
 	Level             int64

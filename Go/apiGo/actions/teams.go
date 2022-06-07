@@ -10,11 +10,11 @@ import (
 	"github.com/mateo/apiGo/models"
 )
 
-func (h handler) ListTeams(w http.ResponseWriter, r *http.Request) {
+func (handler handler) ListTeams(w http.ResponseWriter, r *http.Request) {
 	var teams []models.Team
 	var response models.TeamResponse
 	w.Header().Set("Content-Type", "application/json")
-	if result := h.db.Find(&teams); result.Error != nil {
+	if result := handler.db.Find(&teams); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Status = http.StatusInternalServerError
 		response.Message = result.Error.Error()
@@ -28,12 +28,12 @@ func (h handler) ListTeams(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h handler) ShowTeam(w http.ResponseWriter, r *http.Request) {
+func (handler handler) ShowTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var response models.TeamResponse
 	params := mux.Vars(r)
 	ID := params["id"]
-	team, err := findTeam(h, ID, w, response)
+	team, err := findTeam(handler, ID, w, response)
 	if err != nil {
 		return
 	}
@@ -43,7 +43,7 @@ func (h handler) ShowTeam(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
+func (handler handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var response models.TeamResponse
 	var team models.Team
@@ -53,7 +53,7 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	team.Type = strings.Replace(strings.ToLower(team.Type), " ", "", -1)
 	team.Country = strings.Replace(strings.ToLower(team.Country), " ", "", -1)
 	var teams []models.Team
-	h.db.Find(&teams)
+	handler.db.Find(&teams)
 	for _, t := range teams {
 		if t.Name == team.Name && t.Country == team.Country && t.Type == team.Type {
 			w.WriteHeader(http.StatusBadRequest)
@@ -71,7 +71,7 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	if result := h.db.Create(&team); result.Error != nil {
+	if result := handler.db.Create(&team); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusBadGateway
@@ -85,23 +85,23 @@ func (h handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
+func (handler handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	ID := params["id"]
 
 	var response models.TeamResponse
-	team, err := findTeam(h, ID, w, response)
+	team, err := findTeam(handler, ID, w, response)
 	if err != nil {
 		return
 	}
-	if result := h.db.Delete(&team); result.Error != nil {
+	if result := handler.db.Delete(&team); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 	var teams []models.Team
-	if result := h.db.Find(&teams); result.Error != nil {
+	if result := handler.db.Find(&teams); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusInternalServerError
@@ -115,7 +115,7 @@ func (h handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
+func (handler handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
@@ -123,7 +123,7 @@ func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	var response models.TeamResponse
 	var tempUpdate models.Team
 	json.NewDecoder(r.Body).Decode(&tempUpdate)
-	team, err := findTeam(h, ID, w, response)
+	team, err := findTeam(handler, ID, w, response)
 	if err != nil {
 		return
 	}
@@ -137,7 +137,7 @@ func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	team.Name = tempUpdate.Name
 	team.Country = tempUpdate.Country
 	team.Type = tempUpdate.Type
-	if result := h.db.Save(&team); result.Error != nil {
+	if result := handler.db.Save(&team); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusBadGateway
@@ -151,9 +151,9 @@ func (h handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func findTeam(h handler, ID string, w http.ResponseWriter, response models.TeamResponse) (team models.Team, err error) {
+func findTeam(handler handler, ID string, w http.ResponseWriter, response models.TeamResponse) (team models.Team, err error) {
 
-	if result := h.db.First(&team, &ID); result.Error != nil {
+	if result := handler.db.First(&team, &ID); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
 		response.Message = result.Error.Error()
 		response.Status = http.StatusNotFound

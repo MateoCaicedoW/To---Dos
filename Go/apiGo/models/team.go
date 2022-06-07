@@ -16,7 +16,7 @@ var (
 )
 
 type Team struct {
-	ID      uuid.UUID `gorm:"primary_key; not null; unique"`
+	ID      uuid.UUID `gorm:"primary_key; not null; type:uuid;"`
 	Name    string
 	Type    string
 	Country string
