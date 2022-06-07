@@ -5,7 +5,7 @@ import (
 )
 
 type PlayerTeam struct {
-	ID       int `gorm:"primary_key;  auto_increment"`
+	ID       int `gorm:"primary_key; AUTO_INCREMENT; not null;"`
 	TeamID   uuid.UUID
 	PlayerID uuid.UUID
 }

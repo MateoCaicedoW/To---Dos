@@ -2,6 +2,7 @@ package actions
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -15,13 +16,7 @@ func (handler handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 	var response models.PlayerResponse
 	w.Header().Set("Content-Type", "application/json")
 
-	if result := handler.db.Preload("Teams").Find(&players); result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		response.Message = strings.ToTitle(result.Error.Error())
-		response.Status = http.StatusInternalServerError
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	players = listAllPlayers(handler, w, response)
 	response.Status = http.StatusSeeOther
 	response.Data = players
 	w.WriteHeader(http.StatusSeeOther)
@@ -59,16 +54,17 @@ func (handler handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 
 	handler.db.Model(&player).Association("Teams").Clear()
 	if result := handler.db.Delete(&player); result.Error != nil {
-		w.WriteHeader(http.StatusBadGateway)
-		response.Message = strings.ToTitle(result.Error.Error())
-		response.Status = http.StatusBadGateway
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Message = "Can not delete player"
+		response.Status = http.StatusInternalServerError
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	response.Status = http.StatusOK
-	handler.ListPlayers(w, r)
+	players := listAllPlayers(handler, w, response)
+	response.Data = players
 
 }
 
@@ -141,14 +137,7 @@ func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if result := handler.db.Model(&player).Association("Teams").Replace(teams); result.Error() != "" {
-		w.WriteHeader(http.StatusBadGateway)
-		response.Message = result.Error()
-		response.Status = http.StatusBadGateway
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
+	handler.db.Model(&player).Association("Teams").Replace(teams)
 	w.WriteHeader(http.StatusCreated)
 	response.Status = http.StatusCreated
 	response.Data = models.ListPlayers{player}
@@ -162,15 +151,28 @@ func (handler handler) allTeams() (teams []models.Team) {
 }
 
 func findPlayer(handler handler, idPlayer string, w http.ResponseWriter, response models.PlayerResponse) (player models.Player, err error) {
-
-	if result := handler.db.Preload("Teams").Find(&player, "id = ?", idPlayer); result.Error != nil {
+	handler.db.Preload("Teams").Find(&player, "id = ?", idPlayer)
+	if player.FirstName == "" {
 		w.WriteHeader(http.StatusNotFound)
-		response.Message = strings.ToTitle(result.Error.Error())
+		response.Message = "Player not found"
 		response.Status = http.StatusNotFound
 		json.NewEncoder(w).Encode(response)
+
+		err = errors.New("player not found")
 		return
 	}
 
+	return
+}
+
+func listAllPlayers(handler handler, w http.ResponseWriter, response models.PlayerResponse) (players []models.Player) {
+	if result := handler.db.Preload("Teams").Find(&players); result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Message = strings.ToTitle(result.Error.Error())
+		response.Status = http.StatusInternalServerError
+		json.NewEncoder(w).Encode(response)
+		return
+	}
 	return
 }
 
@@ -181,18 +183,12 @@ func findTeamPlayer(handler handler, w http.ResponseWriter, tempUpdate models.Pl
 		nameTeam := strings.Replace(strings.ToLower(tempUpdate.Teams[i].Name), " ", "", -1)
 		var teamTemp models.Team
 
-		if result := handler.db.Raw("SELECT * FROM teams WHERE name = ?", nameTeam).Scan(&teamTemp); result.Error != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			response.Message = strings.ToTitle(result.Error.Error())
-			response.Status = http.StatusBadRequest
-			json.NewEncoder(w).Encode(response)
-			return
-		}
+		handler.db.Raw("SELECT * FROM teams WHERE name = ?", nameTeam).Scan(&teamTemp)
 
 		if len(teamTemp.Name) == 0 {
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
 			response.Message = strings.ToTitle(nameTeam) + " not found"
-			response.Status = http.StatusBadRequest
+			response.Status = http.StatusInternalServerError
 			json.NewEncoder(w).Encode(response)
 			return
 		}

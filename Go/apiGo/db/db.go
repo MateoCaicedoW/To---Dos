@@ -8,15 +8,15 @@ import (
 
 func Init() *gorm.DB {
 	dbURL := "postgres://postgres:1234@localhost:5432/api"
-	dbb, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
+	database, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
 	}
 
-	dbb.AutoMigrate(&models.Player{})
-	dbb.AutoMigrate(&models.Team{})
+	database.AutoMigrate(&models.Player{})
+	database.AutoMigrate(&models.Team{})
 
-	dbb.AutoMigrate(&models.PlayerTeam{})
-	return dbb
+	database.AutoMigrate(&models.PlayerTeam{})
+	return database
 }
