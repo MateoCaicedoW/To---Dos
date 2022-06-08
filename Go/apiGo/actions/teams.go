@@ -163,7 +163,7 @@ func findTeam(handler handler, ID string, w http.ResponseWriter, response models
 
 	if result := handler.db.First(&team, &ID); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		response.Message = team.Name + " not found"
+		response.Message = "Team not found"
 		response.Status = http.StatusNotFound
 		json.NewEncoder(w).Encode(response)
 		err = errors.New("team not found")
