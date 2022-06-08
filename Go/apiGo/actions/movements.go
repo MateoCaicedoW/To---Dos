@@ -163,7 +163,7 @@ func (handler handler) UnsignPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var playerTeamToRemove models.PlayerTeam
-	//validate if player is already in team
+
 	for _, item := range player.Teams {
 		if item.Type == team.Type {
 			if item.ID == team.ID {
@@ -174,6 +174,7 @@ func (handler handler) UnsignPlayer(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
+	//validate if player is already in team
 	if playerTeamToRemove.ID == 0 {
 		response.Message = player.FirstName + " " + player.LastName + " is not in this team."
 		response.Status = http.StatusBadRequest
