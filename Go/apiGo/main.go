@@ -35,6 +35,7 @@ func main() {
 	router.HandleFunc("/movements/sign-player", handler.SignPlayer).Methods(http.MethodPost)
 	router.HandleFunc("/movements/transfer-player", handler.TransferPlayer).Methods(http.MethodPut)
 	router.HandleFunc("/movements/unsign-player", handler.UnsignPlayer).Methods(http.MethodDelete)
+
 	//configure server
 	server := &http.Server{
 		Addr:    ":3000",

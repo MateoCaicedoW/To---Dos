@@ -65,7 +65,7 @@ func (handler handler) DeletePlayer(w http.ResponseWriter, r *http.Request) {
 	response.Status = http.StatusOK
 	players := listAllPlayers(handler, w, response)
 	response.Data = players
-
+	json.NewEncoder(w).Encode(response)
 }
 
 func (handler handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {

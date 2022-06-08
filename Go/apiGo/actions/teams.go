@@ -96,11 +96,15 @@ func (handler handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+
+	handler.db.Raw("DELETE FROM player_teams WHERE team_id = ?", team.ID).Scan(&team)
 	if result := handler.db.Delete(&team); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
+		response.Message = result.Error.Error()
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
 	var teams []models.Team
 	if result := handler.db.Find(&teams); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -109,6 +113,7 @@ func (handler handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	response.Status = http.StatusOK
 	response.Data = teams
@@ -135,9 +140,11 @@ func (handler handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	team.Name = tempUpdate.Name
-	team.Country = tempUpdate.Country
-	team.Type = tempUpdate.Type
+
+	team.Name = strings.Replace(strings.ToLower(tempUpdate.Name), " ", "", -1)
+	team.Type = strings.Replace(strings.ToLower(tempUpdate.Country), " ", "", -1)
+	team.Country = strings.Replace(strings.ToLower(tempUpdate.Type), " ", "", -1)
+
 	if result := handler.db.Save(&team); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
