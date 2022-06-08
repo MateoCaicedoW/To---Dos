@@ -21,10 +21,9 @@ func TestShowPlayer(t *testing.T) {
 	router.HandleFunc("/players/{id}", h.ShowPlayer).Methods("GET")
 
 	server := &http.Server{
-		Addr:    ":3000",
+		Addr:    ":2000",
 		Handler: router,
 	}
-	server.ListenAndServe()
 	requestresponse := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/players/0065522b-6946-483b-9f60-8d61c1e62459", nil)
 	server.Handler.ServeHTTP(requestresponse, req)
@@ -67,9 +66,7 @@ func TestCreatePlayer(t *testing.T) {
 		Position:          "Defender",
 		PhysicalCondition: "A+",
 		Teams: []models.Team{
-			{
-				Name: "junior",
-			},
+			{},
 		},
 	}
 

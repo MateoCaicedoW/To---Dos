@@ -127,7 +127,7 @@ func Test_validate(t *testing.T) {
 					},
 				},
 			},
-			output: "Teams can not be empty.",
+			output: "",
 		},
 		{
 			input: []Player{
@@ -172,7 +172,8 @@ func Test_validate(t *testing.T) {
 		for _, player := range test.input {
 			response := player.Validate()
 			if response.Message != test.output {
-				t.Errorf("Expected %s, got %s", test.output, response.Message)
+				t.Errorf("Test %d: Expected %s, got %s", i, test.output, response.Message)
+				//t.Errorf("Expected %s, got %s", test.output, response.Message)
 			}
 			log.Printf("Test %d: %v", i, response)
 		}

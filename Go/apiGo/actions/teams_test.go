@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/mateo/apiGo/db"
 	"github.com/mateo/apiGo/models"
@@ -24,7 +23,6 @@ func TestShowTeam(t *testing.T) {
 		Addr:    ":3000",
 		Handler: router,
 	}
-	server.ListenAndServe()
 	requestresponse := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/teams/aed3c9e6-4981-41f5-b587-57be70341744", nil)
 	server.Handler.ServeHTTP(requestresponse, req)
@@ -54,7 +52,6 @@ func TestCreateTeam(t *testing.T) {
 	DB := db.Init()
 	h := New(DB)
 	newTeam := models.Team{
-		ID:      uuid.New(),
 		Name:    "Italia",
 		Type:    "National",
 		Country: "",

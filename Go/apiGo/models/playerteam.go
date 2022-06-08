@@ -17,12 +17,13 @@ func (p *PlayerTeam) Validate() (response PlayerTeamResponse) {
 	response.Status = http.StatusBadRequest
 	response.Data = list
 
-	if p.PlayerID == uuid.Nil {
-		response.Message = "PlayerID cant not be empty."
+	if p.TeamID == uuid.Nil {
+		response.Message = "TeamID can not be empty."
 		return
 	}
-	if p.TeamID == uuid.Nil {
-		response.Message = "TeamID cant not be empty."
+
+	if p.PlayerID == uuid.Nil {
+		response.Message = "PlayerID can not be empty."
 		return
 	}
 

@@ -32,8 +32,9 @@ func main() {
 	router.HandleFunc("/teams/{id}", handler.UpdateTeam).Methods(http.MethodPut)
 
 	//routes to players_teams
-	router.HandleFunc("/team/sign-player", handler.SignPlayer).Methods(http.MethodPost)
-	router.HandleFunc("/team/transfer-player", handler.TransferPlayer).Methods(http.MethodPut)
+	router.HandleFunc("/movements/sign-player", handler.SignPlayer).Methods(http.MethodPost)
+	router.HandleFunc("/movements/transfer-player", handler.TransferPlayer).Methods(http.MethodPut)
+	router.HandleFunc("/movements/unsign-player", handler.UnsignPlayer).Methods(http.MethodDelete)
 	//configure server
 	server := &http.Server{
 		Addr:    ":3000",

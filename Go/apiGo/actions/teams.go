@@ -2,6 +2,7 @@ package actions
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -155,10 +156,10 @@ func findTeam(handler handler, ID string, w http.ResponseWriter, response models
 
 	if result := handler.db.First(&team, &ID); result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		response.Message = "Team not found"
+		response.Message = team.Name + " not found"
 		response.Status = http.StatusNotFound
 		json.NewEncoder(w).Encode(response)
-		err = result.Error
+		err = errors.New("team not found")
 		return
 	}
 	return
