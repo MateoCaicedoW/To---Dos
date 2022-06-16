@@ -19,7 +19,7 @@ var (
 	Dplus  = "d+"
 	Dminus = "d-"
 
-	physicalConditions  = []string{Aplus, Aminus, Bplus, Bminus, Cplus, Cminus, Dplus, Dminus}
+	PhysicalCondition   = []string{Aplus, Aminus, Bplus, Bminus, Cplus, Cminus, Dplus, Dminus}
 	GoalKeeper          = "goalkeeper"
 	Defender            = "defender"
 	CentralMidfielder   = "centralmidfielder"
@@ -31,7 +31,7 @@ var (
 	CentreBack          = "centreback"
 	Winger              = "winger"
 
-	positions = []string{GoalKeeper, Defender, CentralMidfielder, Forward, FullBack, HalfBack, DefensiveMidfielder, AttackingMidfielder, CentreBack, Winger}
+	Positions = []string{GoalKeeper, Defender, CentralMidfielder, Forward, FullBack, HalfBack, DefensiveMidfielder, AttackingMidfielder, CentreBack, Winger}
 )
 
 type Player struct {
@@ -119,7 +119,7 @@ func (p *Player) validatePhysicalCondition() (response PlayerResponse) {
 		return
 	}
 
-	for _, item := range physicalConditions {
+	for _, item := range PhysicalCondition {
 		if item == physicalCondition {
 			response.Message = ""
 			return
@@ -191,7 +191,7 @@ func (p *Player) validatePosition() (response PlayerResponse) {
 		return
 	}
 
-	for _, pos := range positions {
+	for _, pos := range Positions {
 		if pos == position {
 			response.Message = ""
 

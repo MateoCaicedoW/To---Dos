@@ -36,6 +36,10 @@ func main() {
 	router.HandleFunc("/movements/transfer-player", handler.TransferPlayer).Methods(http.MethodPut)
 	router.HandleFunc("/movements/unsign-player", handler.UnsignPlayer).Methods(http.MethodDelete)
 
+	//route to positions
+	router.HandleFunc("/positions", handler.ListPositions).Methods(http.MethodGet)
+	router.HandleFunc("/conditions", handler.ListConditions).Methods(http.MethodGet)
+
 	//configure server
 	server := &http.Server{
 		Addr:    ":3000",

@@ -14,7 +14,8 @@ import (
 func (handler handler) ListTeams(w http.ResponseWriter, r *http.Request) {
 	var teams []models.Team
 	var response models.TeamResponse
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
+
 	if result := handler.db.Find(&teams); result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response.Status = http.StatusInternalServerError
@@ -30,10 +31,12 @@ func (handler handler) ListTeams(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler handler) ShowTeam(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
+
 	var response models.TeamResponse
 	params := mux.Vars(r)
 	ID := params["id"]
+
 	team, err := findTeam(handler, ID, w, response)
 	if err != nil {
 		return
@@ -45,7 +48,8 @@ func (handler handler) ShowTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
+
 	var response models.TeamResponse
 	var team models.Team
 	json.NewDecoder(r.Body).Decode(&team)
@@ -87,7 +91,8 @@ func (handler handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
+
 	params := mux.Vars(r)
 	ID := params["id"]
 
@@ -122,17 +127,19 @@ func (handler handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
 
 	params := mux.Vars(r)
 	ID := params["id"]
 	var response models.TeamResponse
 	var tempUpdate models.Team
+
 	json.NewDecoder(r.Body).Decode(&tempUpdate)
 	team, err := findTeam(handler, ID, w, response)
 	if err != nil {
 		return
 	}
+
 	err2 := tempUpdate.Validate()
 	if err2.Message != "" {
 		w.WriteHeader(http.StatusBadRequest)

@@ -10,7 +10,7 @@ import (
 )
 
 func (handler handler) SignPlayer(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
 
 	var playerTeam models.PlayerTeam
 	json.NewDecoder(r.Body).Decode(&playerTeam)
@@ -66,7 +66,8 @@ func (handler handler) SignPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler handler) TransferPlayer(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
+
 	var response models.PlayerResponse
 	var response2 models.TeamResponse
 
@@ -134,7 +135,8 @@ func (handler handler) TransferPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler handler) UnsignPlayer(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	setupCorsResponse(&w, r)
+
 	var response models.PlayerResponse
 	var response2 models.TeamResponse
 
