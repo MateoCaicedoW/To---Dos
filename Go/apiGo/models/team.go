@@ -12,7 +12,7 @@ var (
 	National = "national"
 	Club     = "club"
 
-	types = []string{National, Club}
+	Types = []string{National, Club}
 )
 
 type Team struct {
@@ -68,7 +68,7 @@ func (t *Team) validateType() (response TeamResponse) {
 
 	response.Status = http.StatusBadRequest
 	typeTeam := strings.Replace(strings.ToLower(t.Type), " ", "", -1)
-	for _, v := range types {
+	for _, v := range Types {
 		if typeTeam == v {
 			response.Message = ""
 			return

@@ -3,6 +3,7 @@ package actions
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -117,11 +118,12 @@ func (handler handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 
 func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	setupCorsResponse(&w, r)
+	body, _ := ioutil.ReadAll(r.Body)
 	params := mux.Vars(r)
 	idPlayer := params["id"]
 	var response models.PlayerResponse
 	var newPlayer models.Player
-	json.NewDecoder(r.Body).Decode(&newPlayer)
+	json.Unmarshal(body, &newPlayer)
 
 	player, err1 := findPlayer(handler, idPlayer, w, response)
 	if err1 != nil {
@@ -131,7 +133,8 @@ func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	err2 := newPlayer.Validate()
 	if err2.Message != "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err2)
+		json, _ := json.Marshal(err2)
+		w.Write(json)
 		return
 	}
 
