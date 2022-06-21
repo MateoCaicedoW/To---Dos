@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -144,6 +145,7 @@ func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	newPlayer.Teams = teams
+	log.Println(newPlayer)
 	//player.Teams = teams
 	if result := handler.db.Model(&player).Updates(newPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
@@ -154,7 +156,7 @@ func (handler handler) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//handler.db.Model(&player).Association("Teams").Replace(teams)
+	handler.db.Model(&player).Association("Teams").Replace(teams)
 
 	response.Status = http.StatusOK
 	json, _ := json.Marshal(response)

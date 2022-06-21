@@ -110,7 +110,7 @@ function getAllPlayers(data) {
                     document.getElementById('last-name').value = element.parentElement.parentElement.children[2].innerHTML
                     document.getElementById('level').value = element.parentElement.parentElement.children[3].innerHTML
                     document.getElementById('age').value = element.parentElement.parentElement.children[4].innerHTML
-
+                    idPlayer = element.parentElement.parentElement.children[0].innerHTML
                     for (let item = 0; item < document.getElementById('position').length; item++) {
                         const i = document.getElementById('position').options[item]
                         if (i.value.toUpperCase() == element.parentElement.parentElement.children[5].innerHTML.replace(" ", "").toUpperCase()) {
@@ -273,6 +273,8 @@ function editPlayer(e, idPlayer) {
         player.Teams.push(team)
     }
 
+    console.log(player);
+
     let route = 'http://localhost:3000/api/players/' + idPlayer
     fetch(route, {
         method: 'PUT',
@@ -284,6 +286,7 @@ function editPlayer(e, idPlayer) {
 
     }).then(res => res.json())
         .then((data) => {
+            console.log(data);
             const divWarning = document.getElementById('warning-div')
             let message = document.getElementById('warning-message')
             validate(divWarning, message, data, formPlayer, btnSavePlayer, btnEditPlayer)
@@ -584,7 +587,7 @@ function validate(divWarning, message, data, form, btnSave, btnEdit) {
         btnEdit.classList.remove('d-none')
 
         console.log(data.Message);
-        window.location.href = '/'
+        //window.location.href = '/'
     }
 
 
