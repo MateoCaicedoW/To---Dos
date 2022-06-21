@@ -73,6 +73,11 @@ func (p *Player) Validate() (response PlayerResponse) {
 		return
 	}
 
+	if p.Level == 0 {
+		response.Message = "Level can not be empty."
+		return
+	}
+
 	if p.Level < 1 || p.Level > 99 && letters.MatchString(strconv.Itoa(int(p.Level))) {
 		response.Message = "Level must be a number."
 		return
@@ -81,13 +86,22 @@ func (p *Player) Validate() (response PlayerResponse) {
 		response.Message = "Level must be between 1 and 99."
 		return
 	}
+
+	if p.Age == 0 {
+		response.Message = "Age can not be empty."
+		return
+	}
+
 	if p.Age < 1 && letters.MatchString(strconv.Itoa(int(p.Age))) {
 		response.Message = "Age must be a number."
 		return
 	}
-	if p.Age < 1 {
+
+	if p.Age < 0 {
 		response.Message = "Age must be greater than 0."
+		return
 	}
+
 	if p.validatePosition().Message != "" {
 		response.Message = p.validatePosition().Message
 		return

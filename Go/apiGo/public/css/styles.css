@@ -1,0 +1,7 @@
+.nav-link,.dropdown-item{
+    cursor: pointer !important; 
+}
+
+.div-table{
+    max-height: 700px;
+}

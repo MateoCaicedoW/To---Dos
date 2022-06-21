@@ -106,24 +106,28 @@ func (handler handler) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 	if result := handler.db.Delete(&team); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
-		json.NewEncoder(w).Encode(response)
+		json, _ := json.Marshal(response)
+		w.WriteHeader(http.StatusBadGateway)
+		w.Write(json)
 		return
 	}
 
 	var teams []models.Team
 	if result := handler.db.Find(&teams); result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+
 		response.Message = result.Error.Error()
 		response.Status = http.StatusInternalServerError
-		json.NewEncoder(w).Encode(response)
+		json, _ := json.Marshal(response)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(json)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	response.Status = http.StatusOK
 	response.Data = teams
-	json.NewEncoder(w).Encode(response)
-
+	json, _ := json.Marshal(response)
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
 }
 
 func (handler handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
@@ -142,27 +146,32 @@ func (handler handler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 
 	err2 := tempUpdate.Validate()
 	if err2.Message != "" {
+		json, _ := json.Marshal(err2)
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err)
+		w.Write(json)
 		return
 
 	}
 
 	team.Name = strings.Replace(strings.ToLower(tempUpdate.Name), " ", "", -1)
-	team.Type = strings.Replace(strings.ToLower(tempUpdate.Country), " ", "", -1)
-	team.Country = strings.Replace(strings.ToLower(tempUpdate.Type), " ", "", -1)
+	team.Type = strings.Replace(strings.ToLower(tempUpdate.Type), " ", "", -1)
+	team.Country = strings.Replace(strings.ToLower(tempUpdate.Country), " ", "", -1)
 
 	if result := handler.db.Save(&team); result.Error != nil {
-		w.WriteHeader(http.StatusBadGateway)
+
 		response.Message = result.Error.Error()
 		response.Status = http.StatusBadGateway
-		json.NewEncoder(w).Encode(response)
+
+		json, _ := json.Marshal(response)
+		w.WriteHeader(http.StatusBadGateway)
+		w.Write(json)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
-	response.Status = http.StatusCreated
+	response.Status = http.StatusOK
 	response.Data = models.ListTeams{team}
-	json.NewEncoder(w).Encode(response)
+	json, _ := json.Marshal(response)
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
 
 }
 
@@ -172,7 +181,8 @@ func findTeam(handler handler, ID string, w http.ResponseWriter, response models
 		w.WriteHeader(http.StatusNotFound)
 		response.Message = "Team not found"
 		response.Status = http.StatusNotFound
-		json.NewEncoder(w).Encode(response)
+		json, _ := json.Marshal(response)
+		w.Write(json)
 		err = errors.New("team not found")
 		return
 	}

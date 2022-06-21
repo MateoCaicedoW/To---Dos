@@ -19,7 +19,7 @@ func (handler handler) ListPlayers(w http.ResponseWriter, r *http.Request) {
 	var response models.PlayerResponse
 
 	players = listAllPlayers(handler, w, response)
-	response.Status = http.StatusSeeOther
+	response.Status = http.StatusOK
 	response.Data = players
 
 	json, _ := json.Marshal(response)
