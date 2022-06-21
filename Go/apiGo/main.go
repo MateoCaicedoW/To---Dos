@@ -26,7 +26,7 @@ func main() {
 	router.HandleFunc("/players/{id}", handler.UpdatePlayer).Methods(http.MethodPut)
 
 	//routes to players
-	router.HandleFunc("/teams", handler.ListTeams).Methods(http.MethodGet)
+	router.HandleFunc("/api/teams", handler.ListTeams).Methods(http.MethodGet)
 	router.HandleFunc("/teams/{id}", handler.ShowTeam).Methods(http.MethodGet)
 	router.HandleFunc("/teams", handler.CreateTeam).Methods(http.MethodPost)
 	router.HandleFunc("/teams/{id}", handler.DeleteTeam).Methods(http.MethodDelete)
