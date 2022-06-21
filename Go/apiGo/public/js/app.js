@@ -1,3 +1,6 @@
+import Todo from './modules/players';
+
+
 //variables for player
 let formPlayer = document.getElementById("form-player");
 let btnEditPlayer = document.getElementById('btn-edit-player')
@@ -13,8 +16,14 @@ let btnEditTeam = document.getElementById('btn-edit-team')
 let btnSaveTeam = document.getElementById('btn-create-team')
 let btnCancelTeam = document.getElementById('btn-cancel-team')
 let btnDeleteTeam = document.getElementById('btn-delete-modal-team')
-let showModalDeleteTeam = document.getElementsByClassName('delete-show-modal-team')
 
+
+//variables for movements
+let formMovement = document.getElementById("form-sign")
+let btnSign = document.getElementById("btn-submit-sign")
+let btnUnsign = document.getElementById("btn-submit-unsign")
+let btnTransfer = document.getElementById("btn-submit-transfer")
+let btnCancelMovement = document.getElementById("btn-cancel-sign")
 
 
 // //Show player and teams when stay on a page
@@ -24,8 +33,8 @@ window.onload = loadInformationTabs
 
 function loadInformationTabs() {
     let arrayTeams = []
-    const ruta2 = 'http://localhost:3000/api/teams'
-    fetch(ruta2, {
+    const rute = 'http://localhost:3000/api/teams'
+    fetch(rute, {
         method: 'GET',
         cache: 'default'
     })
@@ -36,8 +45,26 @@ function loadInformationTabs() {
             arrayTeams = data.Data
             getAllPlayers(arrayTeams)
             getAllTeams(arrayTeams)
+            //List Physical Condition
 
+            let Teams = document.getElementById("team-sign");
+            let html = ''
+            html = `
+                    <option selected disabled value="">Choose...</option>
+                    `
+                    Teams.innerHTML += html
+
+            for (let index = 0; index < arrayTeams.length; index++) {
+                let element = arrayTeams[index];
+                element = element.Name.charAt(0).toUpperCase() + element.Name.slice(1);
+                html += `
+                <option value="${arrayTeams[index].ID}">${element}</option>
+                `
+            }
+            Teams.innerHTML = html
         })
+
+    
 }
 
 
@@ -57,22 +84,32 @@ function getAllPlayers(data) {
         })
         .then((data) => {
             let html = ''
-
+            let html2 = ''
+            let dropPlayer = document.getElementById("player-sign");
             //list of players
+            html2 = `
+                        <option selected disabled value="">Choose...</option>
+                        `
+                        dropPlayer.innerHTML += html2
             for (let index = 0; index < data.Data.length; index++) {
                 const player = data.Data[index];
+                
+
+                    let element = player.FirstName + ' ' + player.LastName;
+                    html2 += `
+                    <option value="${data.Data[index].ID}">${element}</option>
+                    `
+                
                 let team = ''
                 let club = ''
                 for (let index = 0; index < player.Teams.length; index++) {
                     const element = player.Teams[index];
                     const name = element.Name.charAt(0).toUpperCase() + element.Name.slice(1);
                     if (element.Type == "club") {
-
                         club = `${name}`
                     } else {
                         team = `${name}`
                     }
-
                 }
                 html += `
             <tr>
@@ -95,8 +132,9 @@ function getAllPlayers(data) {
             </tr>
             `
             }
-            document.getElementById('body-players').innerHTML = html
+            dropPlayer.innerHTML = html2
 
+            document.getElementById('body-players').innerHTML = html
             //Show One Player
             //let form = document.getElementById('form-player')
             let idPlayer = ""
@@ -532,7 +570,6 @@ btnEditTeam.addEventListener('click', (e) => {
         body : JSON.stringify(team),
     }).then(res => res.json())
     .then((data) => {
-        console.log(data.Message);
         const divWarning = document.getElementById('warning-div-team')
         let message = document.getElementById('warning-message-team')
         validate(divWarning, message, data, formTeam, btnSaveTeam, btnEditTeam)
@@ -573,10 +610,79 @@ btnSaveTeam.addEventListener('click', (e) => {
 //***End Function for teams */
 
 
-//validate function
 
+//Function for movements
+
+//btnCancel
+btnCancelMovement.addEventListener('click', () =>{
+    formMovement.reset()
+})
+
+//btnSignPlayer
+btnSign.addEventListener('click', (e) => {
+    e.preventDefault()
+
+    let sign = {
+        TeamID: formMovement["team-sign"].value,
+        PlayerID: formMovement["player-sign"].value,
+    }   
+    console.log(sign);
+    const rute = 'http://localhost:3000/api/movements/sign-player'
+
+    fetch(rute, {
+        method: 'POST',
+        body: JSON.stringify(sign),
+    }).then((response) => response.json())
+    .then((data) => {
+        validateMovements(data)
+    })
+   
+})
+
+
+//btnUnsignPlayer
+btnUnsign.addEventListener('click', (e) =>{
+    e.preventDefault()
+
+    let unsign = {
+        TeamID: formMovement["team-sign"].value,
+        PlayerID: formMovement["player-sign"].value,
+    }   
+
+    const rute = 'http://localhost:3000/api/movements/unsign-player'
+
+    fetch(rute, {
+            method: 'DELETE',
+            body: JSON.stringify(unsign),
+        }).then((response) => response.json())
+        .then((data) => {
+            validateMovements(data)
+        })
+})
+
+btnTransfer.addEventListener('click', (e) =>{  
+    e.preventDefault()
+    let transfer = {
+        TeamID: formMovement["team-sign"].value,
+        PlayerID: formMovement["player-sign"].value,
+    }   
+
+    const rute = 'http://localhost:3000/api/movements/transfer-player'
+
+    fetch(rute, {
+            method: 'PUT',
+            body: JSON.stringify(transfer),
+        }).then((response) => response.json())
+        .then((data) => {
+            validateMovements(data)
+        })
+
+});
+
+
+
+//validate functionA
 function validate(divWarning, message, data, form, btnSave, btnEdit) {
-
     if (data.Message != "") {
         divWarning.classList.remove('d-none')  //show warning div
         message.innerHTML = data.Message
@@ -587,8 +693,28 @@ function validate(divWarning, message, data, form, btnSave, btnEdit) {
         btnEdit.classList.remove('d-none')
 
         console.log(data.Message);
-        //window.location.href = '/'
+        window.location.href = '/'
     }
-
-
 }
+
+
+//validate movements
+function validateMovements( data) {
+
+    const divWarning = document.getElementById('warning-div-sign')
+    let messageWarning = document.getElementById('warning-message-sign')
+    let messagesuccess = document.getElementById('success-message-sign')
+    const divSuccess = document.getElementById('success-div-sign')
+    if (data.Status != 200) {
+        divWarning.classList.remove('d-none')
+        divSuccess.classList.add('d-none')   //show warning div
+        messageWarning.innerHTML = data.Message
+        
+    }else{
+        divSuccess.classList.remove('d-none')
+        divWarning.classList.add('d-none')  //show warning div
+        messagesuccess.innerHTML = data.Message
+    }
+}
+
+
