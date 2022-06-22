@@ -3,7 +3,6 @@ package actions
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 
@@ -186,7 +185,6 @@ func findTeam(handler handler, ID string, w http.ResponseWriter, response models
 		w.WriteHeader(http.StatusNotFound)
 		response.Message = "Team not found"
 		response.Status = http.StatusNotFound
-		log.Println("aaa")
 
 		json, _ := json.Marshal(response)
 		w.Write(json)

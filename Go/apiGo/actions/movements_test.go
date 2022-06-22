@@ -140,17 +140,16 @@ func TestSignPlayer(T *testing.T) {
 }
 
 func TestUnsignPlayer(T *testing.T) {
-	DB := db.Init()
+	DB := db.Test()
 	handler := New(DB)
 
 	id1 := uuid.New().String()
-	//id2 := uuid.New().String()
+	id2 := uuid.New().String()
 	id3 := uuid.New().String()
 	id4 := uuid.New().String()
 	rand.Seed(time.Now().UnixNano())
 	team1 := create(id1, randomString(13), "club", "Colombia")
-	//team2 := create(id2, randomString(13), "club", "Colombia")
-
+	team2 := create(id2, randomString(13), "club", "Spain")
 	team3 := create(id3, randomString(13), "national", "")
 	team4 := create(id4, randomString(13), "national", "")
 
@@ -161,7 +160,7 @@ func TestUnsignPlayer(T *testing.T) {
 			//Player is not in this club.
 			input: models.PlayerTeam{
 				PlayerID: player1.ID,
-				TeamID:   team3.ID,
+				TeamID:   team2.ID,
 			},
 			status: http.StatusBadRequest,
 		},
@@ -185,7 +184,7 @@ func TestUnsignPlayer(T *testing.T) {
 			//PlayerID cant not be empty.
 			input: models.PlayerTeam{
 				PlayerID: uuid.Nil,
-				TeamID:   team1.ID,
+				TeamID:   team3.ID,
 			},
 			status: http.StatusBadRequest,
 		},
@@ -225,15 +224,58 @@ func TestUnsignPlayer(T *testing.T) {
 }
 
 func TestTransferPlayer(t *testing.T) {
-	DB := db.Init()
+	DB := db.Test()
 	handler := New(DB)
+	id1 := uuid.New().String()
+	id3 := uuid.New().String()
+	rand.Seed(time.Now().UnixNano())
+	team1 := create(id1, randomString(13), "club", "Colombia")
+	team3 := create(id3, randomString(13), "national", "")
+	player1 := createPlayer(id1)
+
+	sign := []tests{
+		{
+			//CLub sign player
+			input: models.PlayerTeam{
+				PlayerID: player1.ID,
+				TeamID:   team1.ID,
+			},
+			status: http.StatusOK,
+		},
+		{
+			//National sign player
+			input: models.PlayerTeam{
+				PlayerID: player1.ID,
+				TeamID:   team3.ID,
+			},
+			status: http.StatusOK,
+		},
+	}
+	for _, item := range sign {
+		jsonStr, err := json.Marshal(item.input)
+		if err != nil {
+			panic(err)
+		}
+		router := mux.NewRouter()
+		router.HandleFunc("/team/sign-player", handler.SignPlayer).Methods(http.MethodPost)
+
+		server := &http.Server{
+			Addr:    ":3000",
+			Handler: router,
+		}
+		requestresponse := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/team/sign-player", bytes.NewBuffer(jsonStr))
+
+		server.Handler.ServeHTTP(requestresponse, req)
+	}
 
 	tests := []tests{
+
 		{
 			//player is in this team.
 			input: models.PlayerTeam{
-				PlayerID: uuid.MustParse("0065522b-6946-483b-9f60-8d61c1e62459"),
-				TeamID:   uuid.MustParse("7998808a-18c9-4e19-8954-41ca344e1276"),
+				PlayerID: player1.ID,
+				TeamID:   team1.ID,
 			},
 			status: http.StatusBadRequest,
 		},
@@ -241,7 +283,7 @@ func TestTransferPlayer(t *testing.T) {
 			//player does not exists.
 			input: models.PlayerTeam{
 				PlayerID: uuid.MustParse("0065522b-6946-483b-9f60-8d61c1e62478"),
-				TeamID:   uuid.MustParse("7998808a-18c9-4e19-8954-41ca344e1276"),
+				TeamID:   team1.ID,
 			},
 			status: http.StatusNotFound,
 		},
