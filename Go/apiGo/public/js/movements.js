@@ -4,8 +4,10 @@ let btnSign = document.getElementById("btn-submit-sign")
 let btnUnsign = document.getElementById("btn-submit-unsign")
 let btnTransfer = document.getElementById("btn-submit-transfer")
 let btnCancelMovement = document.getElementById("btn-cancel-sign")
-
-
+const divSuccess = document.getElementById('success-div-sign')
+const divWarning = document.getElementById('warning-div-sign')
+const closeButtonError = document.getElementById('close-button-sign-error')
+const closeButtonSuccess = document.getElementById('close-button-sign-success')
 //btnCancel
 function resetFormMovement() {
 
@@ -86,10 +88,9 @@ function transferPlayer() {
 //validate movements
 function validateMovements(data) {
 
-    const divWarning = document.getElementById('warning-div-sign')
     let messageWarning = document.getElementById('warning-message-sign')
     let messagesuccess = document.getElementById('success-message-sign')
-    const divSuccess = document.getElementById('success-div-sign')
+
     if (data.Status != 200) {
         divWarning.classList.remove('d-none')
         divSuccess.classList.add('d-none')   //show warning div
@@ -101,5 +102,18 @@ function validateMovements(data) {
         messagesuccess.innerHTML = data.Message
     }
 }
+function close(){
+    closeButtonError.addEventListener('click', (e) => {
+        e.preventDefault();
+        divWarning.classList.add('d-none')
+    })
 
-export default {resetFormMovement,signPlayer,unsignPlayer,transferPlayer}
+    closeButtonSuccess.addEventListener('click', (e) => {
+        e.preventDefault();
+        divSuccess.classList.add('d-none')
+    })
+
+}
+
+
+export default {resetFormMovement,signPlayer,unsignPlayer,transferPlayer,close}

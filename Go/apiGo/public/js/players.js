@@ -7,15 +7,15 @@ let btnSavePlayer = document.getElementById('btn-create-player')
 let btnCancelPlayer = document.getElementById('btn-cancel-player')
 let btnDeletePlayer = document.getElementById('btn-delete-player-modal')
 let showModalDelete = document.getElementsByClassName('delete-show-modal-player')
-
+let btnClose =document.getElementById('close-button-player');
+const divWarning = document.getElementById('warning-div')
 //editPlayer Function
 
 function getAllPlayers(data) {
 
     const ruta = 'http://localhost:3000/api/players'
     fetch(ruta, {
-        method: 'GET',
-        cache: 'default'
+        method: 'GET'
     })
         .then(res => {
             return res.json()
@@ -261,7 +261,6 @@ function editPlayer(e, idPlayer) {
     }).then(res => res.json())
         .then((data) => {
             console.log(data);
-            const divWarning = document.getElementById('warning-div')
             let message = document.getElementById('warning-message')
             validate(divWarning, message, data, formPlayer, btnSavePlayer, btnEditPlayer)
         }).catch(err => console.log(err))
@@ -308,12 +307,11 @@ function savePlayer(){
                 'Content-Type': 'application/json',
                 'Alow-Control-Allow-Origin': '*',
             },
-            cache: 'default',
             body: JSON.stringify(player),
         }).then(res => res.json())
             .then((data) => {
     
-                const divWarning = document.getElementById('warning-div')
+                
                 let message = document.getElementById('warning-message')
                 validate(divWarning, message, data, formPlayer, btnSavePlayer, btnEditPlayer)
     
@@ -345,7 +343,6 @@ function deletePlayer(){
             headers: {
                 'Content-Type': 'application/json',
             },
-            cache: 'default',
         }).then(res => {
             console.log(res)
         }).then((data) => {
@@ -356,9 +353,16 @@ function deletePlayer(){
     })
 }
 
+function closeWarning(){
+    btnClose.addEventListener('click', (e) => {
+        e.preventDefault();
+        divWarning.classList.add('d-none')
+    })
+
+}
 
 //end Delete player fuction
 
 //**End Function for players */
 
-export default {getAllPlayers, resetFormPlayer, deletePlayer, savePlayer}
+export default {getAllPlayers, resetFormPlayer, deletePlayer, savePlayer, closeWarning}

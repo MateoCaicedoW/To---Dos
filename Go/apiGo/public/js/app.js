@@ -20,7 +20,6 @@ function loadInformationTabs() {
     const rute = 'http://localhost:3000/api/teams'
     fetch(rute, {
         method: 'GET',
-        cache: 'default'
     })
         .then(res => {
             return res.json()
@@ -57,6 +56,7 @@ function loadInformationTabs() {
 players.savePlayer()
 players.deletePlayer()
 players.resetFormPlayer()
+players.closeWarning()
 
 
 //**Function for teams */
@@ -65,6 +65,7 @@ teams.saveTeam()
 teams.deleteTeam()
 teams.resetFormTeam()
 teams.editTeam()
+teams.closeWarning()
 //***End Function for teams */
 
 
@@ -74,7 +75,7 @@ movements.resetFormMovement()
 movements.signPlayer()
 movements.transferPlayer()
 movements.unsignPlayer()
-
+movements.close()
 
 
 

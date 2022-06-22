@@ -6,8 +6,8 @@ let btnEditTeam = document.getElementById('btn-edit-team')
 let btnSaveTeam = document.getElementById('btn-create-team')
 let btnCancelTeam = document.getElementById('btn-cancel-team')
 let btnDeleteTeam = document.getElementById('btn-delete-modal-team')
-
-
+let btnClose =document.getElementById('close-button-teams');
+const divWarning = document.getElementById('warning-div-team')
 function getAllTeams(data) {
     let html2 = ''
     // list of teams
@@ -140,8 +140,8 @@ function deleteTeam() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            cors: 'no-cors',
-            cache: 'default',
+            cors: 'no-cors'
+            
         }).then(res => {
             res.json()
             
@@ -171,7 +171,6 @@ function editTeam(){
             body : JSON.stringify(team),
         }).then(res => res.json())
         .then((data) => {
-            const divWarning = document.getElementById('warning-div-team')
             let message = document.getElementById('warning-message-team')
             validate(divWarning, message, data, formTeam, btnSaveTeam, btnEditTeam)
         }).catch(err => console.log(err))
@@ -194,12 +193,10 @@ function saveTeam(){
                 'Content-Type': 'application/json',
                 'Alow-Control-Allow-Origin': '*',
             },
-            cache: 'default',
-            body: JSON.stringify(team),
+            
+            body: JSON.stringify(team)
         }).then(res => res.json()
         ).then((data) => {
-    
-            const divWarning = document.getElementById('warning-div-team')
             let message = document.getElementById('warning-message-team')
             validate(divWarning, message, data, formTeam, btnSaveTeam, btnEditTeam)
         }).catch(err => console.log(err))
@@ -208,4 +205,12 @@ function saveTeam(){
     })
 }
 
-export default {getAllTeams, resetFormTeam, saveTeam, editTeam, deleteTeam}
+
+function closeWarning(){
+    btnClose.addEventListener('click', (e) => {
+        e.preventDefault();
+        divWarning.classList.add('d-none')
+    })
+
+}
+export default {getAllTeams, resetFormTeam, saveTeam, editTeam, deleteTeam, closeWarning}

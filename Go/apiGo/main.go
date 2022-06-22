@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	cors "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/mateo/apiGo/actions"
 	"github.com/mateo/apiGo/db"
@@ -55,18 +54,9 @@ func main() {
 	router.HandleFunc("/api/conditions", handler.ListConditions).Methods(http.MethodGet)
 	router.HandleFunc(("/api/types"), handler.ListTypes).Methods(http.MethodGet)
 
-	//cors
-
-	headers := cors.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	methods := cors.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-	origins := cors.AllowedOrigins([]string{"*"})
-
-	configCors := cors.CORS(headers, methods, origins)
-
-	//configure server
 	server := &http.Server{
 		Addr:    ":3000",
-		Handler: configCors(router),
+		Handler: router,
 	}
 
 	//start server
