@@ -10,7 +10,6 @@ const closeButtonError = document.getElementById('close-button-sign-error')
 const closeButtonSuccess = document.getElementById('close-button-sign-success')
 //btnCancel
 function resetFormMovement() {
-
     btnCancelMovement.addEventListener('click', () => {
         formMovement.reset()
     })
