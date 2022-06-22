@@ -18,12 +18,12 @@ func (p *PlayerTeam) Validate() (response PlayerTeamResponse) {
 	response.Data = list
 
 	if p.TeamID == uuid.Nil {
-		response.Message = "TeamID can not be empty."
+		response.Message = "The name team can not be empty."
 		return
 	}
 
 	if p.PlayerID == uuid.Nil {
-		response.Message = "PlayerID can not be empty."
+		response.Message = "The name player can not be empty."
 		return
 	}
 
