@@ -8,7 +8,18 @@ import (
 
 func Init() *gorm.DB {
 	dbURL := "postgres://postgres:1234@localhost:5432/api"
-	database, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
+	database := migrate(dbURL)
+	return database
+}
+func Test() *gorm.DB {
+	dbURL := "postgres://postgres:1234@localhost:5432/test"
+	database := migrate(dbURL)
+	return database
+
+}
+
+func migrate(url string) *gorm.DB {
+	database, err := gorm.Open(postgres.Open(url), &gorm.Config{})
 
 	if err != nil {
 		panic(err)

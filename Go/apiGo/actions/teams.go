@@ -3,6 +3,7 @@ package actions
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -53,7 +54,11 @@ func (handler handler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	var response models.TeamResponse
 	var team models.Team
 	json.NewDecoder(r.Body).Decode(&team)
-	team.ID = uuid.New()
+
+	if team.ID.String() == "00000000-0000-0000-0000-000000000000" {
+		team.ID = uuid.New()
+	}
+
 	team.Name = strings.Replace(strings.ToLower(team.Name), " ", "", -1)
 	team.Type = strings.Replace(strings.ToLower(team.Type), " ", "", -1)
 	team.Country = strings.Replace(strings.ToLower(team.Country), " ", "", -1)
@@ -181,6 +186,8 @@ func findTeam(handler handler, ID string, w http.ResponseWriter, response models
 		w.WriteHeader(http.StatusNotFound)
 		response.Message = "Team not found"
 		response.Status = http.StatusNotFound
+		log.Println("aaa")
+
 		json, _ := json.Marshal(response)
 		w.Write(json)
 		err = errors.New("team not found")

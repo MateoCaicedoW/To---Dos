@@ -29,7 +29,7 @@ func main() {
 			log.Println(err)
 		}
 		w.Write(file)
-	}).Methods("GET")
+	})
 
 	//routes to teams
 	router.HandleFunc("/api/players", handler.ListPlayers).Methods(http.MethodGet)

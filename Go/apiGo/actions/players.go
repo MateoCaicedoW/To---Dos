@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -81,7 +82,10 @@ func (handler handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	var response models.PlayerResponse
 	var newPlayer models.Player
 	json.NewDecoder(r.Body).Decode(&newPlayer)
-	newPlayer.ID = uuid.New()
+
+	if newPlayer.ID.String() == "00000000-0000-0000-0000-000000000000" {
+		newPlayer.ID = uuid.New()
+	}
 
 	err := newPlayer.Validate()
 	if err.Message != "" {
@@ -90,9 +94,8 @@ func (handler handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 		w.Write(json)
 		return
 	}
-
+	log.Println("aaas")
 	teams, response := findTeamPlayer(handler, w, newPlayer)
-
 	if response.Status != http.StatusOK {
 		return
 	}
@@ -101,6 +104,7 @@ func (handler handler) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	if result := handler.db.Create(&newPlayer); result.Error != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		response.Message = result.Error.Error()
+
 		response.Status = http.StatusBadGateway
 		json, _ := json.Marshal(response)
 		w.Write(json)
@@ -212,6 +216,7 @@ func findTeamPlayer(handler handler, w http.ResponseWriter,
 			w.WriteHeader(http.StatusInternalServerError)
 			response.Message = strings.ToTitle(nameTeam) + " not found"
 			response.Status = http.StatusInternalServerError
+			log.Println("vaciooooo")
 			json, _ := json.Marshal(response)
 			w.Write(json)
 			return

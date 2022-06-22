@@ -16,5 +16,4 @@ func New(db *gorm.DB) handler {
 
 func setupCorsResponse(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Content-Type", "application/json")
-
 }
